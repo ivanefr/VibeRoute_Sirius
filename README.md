@@ -15,8 +15,10 @@
 
 ```
 python -m venv venv
+
+venv\Scripts\activate
 ```
-venv\Scripts\activate(В терминале должно появиться `(venv)` в начале строки.)
+(В терминале должно появиться `(venv)` в начале строки.)
 
 ---
 
