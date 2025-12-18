@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>VibeRoute — Твой идеальный маршрут, созданный AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html,body{margin:0;padding:0;font-family:system-ui,sans-serif;background:#f7f8fa;}
+        .header{background:white;padding:24px 8vw 16px 8vw;border-bottom:1.5px solid #eaeaea;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+        .logo{font-size:2.2rem;font-weight:700;letter-spacing:1px;color:#fd4e4e;display:flex;flex-direction:row;align-items:center;}
+        .logo img{height:40px;margin-right:14px;}
+        .desc{font-size:1.1rem;color:#646464;}
+        .header-btns{display:flex;gap:8px;}
+        .header-btns button{background:none;border:1px solid #dddb; color:#666; padding:6px 16px; border-radius:28px; cursor:pointer;}
+        .header-btns button:hover{background:#fd4e4e;color:#fff;}
+        .container{display:flex;flex-direction:row;gap:36px;max-width:1120px;margin:36px auto 0 auto;}
+        .leftcol,.rightcol{background:white;border-radius:18px;box-shadow:0 3px 24px rgba(0,0,0,0.03);padding:32px 24px;flex:1;}
+        .leftcol{min-width:308px;max-width:440px;}
+        .rightcol{flex:2;min-width:264px;}
+        .params label{font-weight:600;margin-top:18px;}
+        .param-block{margin-bottom:24px;}
+        .route-pts{margin-bottom:12px;}
+        .waypoint-row{display:flex;align-items:center;margin-bottom:8px;gap:6px;}
+        .waypoint-row input{flex:1;}
+        .waypoint-btn{background:none;border:none;font-size:1.25rem;cursor:pointer;}
+        .waypoint-btn.remove{color:#fd4e4e;}
+        .waypoint-btn.up{color:#5797f8;}
+        .add-wp-btn{
+            margin-top:8px;
+            margin-bottom:10px;
+            padding:7px 14px;
+            border-radius:18px;
+            border:1px dashed #fd4e4e;
+            background:#fff7f7;
+            color:#fd4e4e;
+            font-size:0.9rem;
+            cursor:pointer;
+            transition:background .16s,color .16s,border-color .16s,transform .08s;
+        }
+        .add-wp-btn:hover{
+            background:#fd4e4e;
+            color:#fff;
+            border-style:solid;
+            transform:translateY(-1px);
+        }
+        .btn-main{background:#fd4e4e;border:none;color:white;font-weight:700;font-size:1.17rem;padding:14px 0;border-radius:32px;margin-top:26px;width:100%;cursor:pointer;box-shadow:0 2px 4px #fd4e4e22;}
+        .btn-main:disabled{background:#e0e0e0;color:#aaa;}
+        .char-vibe-cards{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;}
+        .char-vibe-card{flex:1 0 38%;min-width:100px;max-width:156px;display:flex;align-items:center;gap:8px;background:#fafafb;border:1.5px solid #eee;padding:8px 9px;border-radius:20px;cursor:pointer;transition:.16s;}
+        .char-vibe-card.selected{border:2.6px solid #fd4e4e;background:#ffeded;}
+        .char-vibe-card:hover{border:2px solid #fd4e4e22;}
+        .flex{display:flex;}
+        .gap{gap:13px;}
+        .budget-row{flex-wrap:wrap;}
+        .pres-budget{
+            border:1px solid #ddd;
+            background:#f5f6fa;
+            padding:6px 10px;
+            border-radius:18px;
+            font-size:0.86rem;
+            cursor:pointer;
+            white-space:nowrap;
+            transition:background .16s,color .16s,border-color .16s;
+        }
+        .pres-budget:hover{
+            background:#fd4e4e;
+            border-color:#fd4e4e;
+            color:#fff;
+        }
+        .slider-label{margin-right:10px;display:inline-block; font-size:0.99rem;}
+        input[type="text"],
+        input[type="number"],
+        select{
+            border-radius:10px;
+            border:1px solid #ddd;
+            padding:7px 10px;
+            font-size:0.95rem;
+            box-sizing:border-box;
+            outline:none;
+            transition:border-color .16s,box-shadow .16s,background .16s;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus{
+            border-color:#fd4e4e;
+            box-shadow:0 0 0 2px #fd4e4e22;
+            background:#fffdfd;
+        }
+        .result-area{background:white;box-shadow:0 3px 24px rgba(0,0,0,0.04);border-radius:18px;margin:28px auto 0 auto;max-width:1120px;padding:32px 13vw 24px 13vw;}
+        .result-h{margin-bottom:0;font-size:2.01rem;}
+        .result-metrics{display:flex;flex-wrap:wrap;gap:26px;margin-top:16px;margin-bottom:24px;}
+        .metric{background:#f4f6fb;border-radius:11px;padding:14px 22px;min-width:120px;display:flex;flex-direction:column;align-items:center;}
+        .metric-label{font-size:1.08rem;color:#666;}
+        .metric-val{font-size:1.4rem;font-weight:700;}
+        .step-list{margin:0;padding:0;}
+        .step-item{margin-top:20px;background:#f8f8fa;border-radius:12px;padding:19px 15px;}
+        .step-item img{width:180px;border-radius:10px;box-shadow:0 1px 5px #0002;}
+        .step-geolink{font-size:0.99rem;color:#5797f8;font-weight:600;text-decoration:none;}
+        .segment-info{margin:6px 0 3px 0;color:#888;font-size:0.99rem;}
+        .tips-block{background:#e8ffd8;border-radius:9px;padding:8px 17px;color:#235d0c;margin-top:14px;font-size:1.02rem;}
+        .actions{display:flex;gap:16px;margin-top:24px;}
+        .footer{background:#fcfcfc;padding:26px 0 15px 0;margin-top:54px;border-top:1.5px solid #eaeaea;font-size:0.98rem;color:#888;text-align:center;}
+        @media(max-width:900px){
+            .container{flex-direction:column;gap:23px;padding:0 1vw;}
+            .leftcol,.rightcol{max-width:none;}
+            .result-area{padding:28px 1vw;}
+        }
+        @media(max-width:600px){
+            .header{flex-direction:column;align-items:flex-start;padding:19px 3vw;}
+            .container,.result-area{padding:0;}
+            .leftcol,.rightcol{padding:17px 4vw;}
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="https://raw.githubusercontent.com/streamlit/brand/main/logos/streamlit-logo-primary-colormark-darktext.png" alt="logo">
+            VibeRoute
+        </div>
+        <div class="desc">Твой идеальный маршрут, созданный AI</div>
+        <div class="header-btns">
+            <button onclick="alert('VibeRoute — сервис планирования прогулок и маршрутов по настроению, бюджету и времени. Powered by AI.')">О проекте</button>
+            <button onclick="window.location='mailto:hello@viberoute.ai'">Контакты</button>
+        </div>
+    </div>
+    <form id="mainform" method="post" style="margin:0;padding:0;">
+    <div class="container">
+        <div class="leftcol">
+            <div class="params">
+                <div class="param-block route-pts">
+                    <label for="start_addr">Откуда начать?</label>
+                    <div style="display:flex;gap:10px;margin-bottom:6px;">
+                        <input type="text" id="start_addr" name="start_addr" placeholder="Введите адрес..." 
+                            style="flex:1;" value="{{ formdata.start_addr|default('')}}">
+                        <button type="button" onclick="geoLocateStart()" title="Использовать геопозицию" style="border:none;background:none;cursor:pointer;font-size:1.35rem;">📍</button>
+                    </div>
+                    
+                    <label>Куда хочешь зайти? <span style="font-weight:normal;">(промежуточные точки)</span></label>
+                    <div id="waypoints_fields">
+                        {% for pt in formdata.waypoints %}
+                        <div class="waypoint-row" draggable="true" data-idx="{{ loop.index0 }}">
+                            <input type="text" name="waypoints" value="{{ pt }}" placeholder="Добавьте место...">
+                            <button class="waypoint-btn up" type="button" onclick="moveWaypointUp({{ loop.index0 }})" title="Вверх" {% if loop.first %}disabled{% endif %}>⬆️</button>
+                            <button class="waypoint-btn remove" type="button" onclick="removeWaypoint({{ loop.index0 }})">✖</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="add-wp-btn" onclick="addWaypoint()">+ Добавить место</button>
+                    
+                    <label for="end_addr" style="margin-top:16px;">Куда хочешь прийти?</label>
+                    <input type="text" id="end_addr" name="end_addr" placeholder="Введите адрес..." value="{{ formdata.end_addr|default('') }}">
+                </div>
+                <div class="param-block walk-details">
+                    <label>Длительность прогулки</label>
+                    <div class="flex gap" style="margin-top:5px;">
+                        <select name="duration_hrs" style="font-size:1rem;">
+                            {% for i in range(1,9) %}
+                            <option value="{{i}}" {% if formdata.duration_hrs==i %}selected{% endif %}>{{i}} ч</option>
+                            {% endfor %}
+                        </select>
+                        <select name="duration_mins" style="font-size:1rem;">
+                            {% for mins in [0,15,30,45] %}
+                            <option value="{{mins}}" {% if formdata.duration_mins==mins %}selected{% endif %}>{{ "0" if mins==0 else mins }} мин</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <label style="margin-top:17px;">Бюджет на человека <span style="font-size:0.98em;color:#aaa;">(₽)</span></label>
+                    <div class="flex gap budget-row" style="margin-top:5px;align-items:center;">
+                        <input type="range" min="500" max="10000" step="100" value="{{ formdata.budget|default(2000) }}" id="budget_slider"
+                            style="width:110px;" onchange="budgetValInp.value=this.value">
+                        <span class="slider-label"><input type="number" name="budget" min="500" max="10000" step="100" 
+                            id="budgetValInp" value="{{ formdata.budget|default(2000) }}" 
+                            style="width:65px;" oninput="budget_slider.value=this.value"></span>
+                        <button type="button" class="pres-budget" onclick="setBudget(1000)">Эконом</button>
+                        <button type="button" class="pres-budget" onclick="setBudget(3000)">Средний</button>
+                        <button type="button" class="pres-budget" onclick="setBudget(6000)">Комфортный</button>
+                        <button type="button" class="pres-budget" onclick="setBudget(10000)">Безлимитный</button>
+                    </div>
+                    
+                    <label style="margin-top:17px;">Характер прогулки</label>
+                    <div class="char-vibe-cards" id="vibe-cards">
+                        {% for v in vibes %}
+                        <div class="char-vibe-card {% if formdata.vibe==v[0] %}selected{% endif %}" data-vibe="{{v[0]}}" onclick="selectVibe('{{v[0]}}')">
+                            <span>{{v[1]}}</span> <span>{{v[2]}}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" id="vibe" name="vibe" value="{{ formdata.vibe|default('romantic') }}">
+                    
+                    <label style="margin-top:15px;">Свои пожелания</label>
+                    <input type="text" name="extra_notes" placeholder="Опишите ваши пожелания..." 
+                        value="{{ formdata.extra_notes|default('') }}" style="width:100%;">
+                </div>
+                <button class="btn-main" type="submit" id="submitBtn" {% if loading %}disabled{% endif %}>
+                    {% if loading %}<span id="spinner">⏳</span> Генерируем...{% else %}Создать Маршрут{% endif %}
+                </button>
+            </div>
+        </div>
+        <div class="rightcol">
+            <div id="map" style="width:100%;height:360px;border-radius:14px;box-shadow:0 1px 8px #0002;"></div>
+            <div style="font-size:.98em;color:#aaa;margin-top:10px;">* Маркеры появятся по мере заполнения точек. Кликните по карте для добавления.</div>
+        </div>
+    </div>
+    </form>
+    {% if generated %}
+    <div class="result-area" id="results">
+        <h2 class="result-h">Твой идеальный маршрут!</h2>
+        <div class="result-metrics">
+            <div class="metric">
+                <span class="metric-label">Тип прогулки</span>
+                <span class="metric-val">{{ result_data.vibe_verbose }}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Длительность</span>
+                <span class="metric-val">{{ result_data.duration_str }}</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Бюджет</span>
+                <span class="metric-val">{{ result_data.budget }} ₽</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Дистанция</span>
+                <span class="metric-val">{{ result_data.distance }} км</span>
+            </div>
+        </div>
+        <h3 style="margin:26px 0 9px 0;">Пошаговый план маршрута</h3>
+        <ul class="step-list">
+            {% for step in result_data.steps %}
+            <li class="step-item">
+                <div><b>{{ loop.index }}. {{ step.name }}</b></div>
+                <div style="margin:7px 0 7px 0;">{{ step.desc }}</div>
+                <div style="margin:7px 0 7px 0;color:#534">
+                    <b>Бюджет:</b> {{ step.budget }}</div>
+                <img src="{{step.img}}" alt="img места" loading="lazy"/>
+                <br>
+                <a href="{{step.map_link}}" target="_blank" class="step-geolink">Посмотреть на карте</a>
+                {% if step.segment %}
+                <div class="segment-info">{{step.segment}}</div>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="tips-block">
+            {{ result_data.tips|safe }}
+        </div>
+        <div class="actions">
+            <button onclick="alert('Сохранить можно будет после входа!')" class="btn-main" style="background:#a8d18a">Сохранить маршрут</button>
+            <button onclick="navigator.clipboard.writeText(window.location.href);alert('Ссылка на маршрут скопирована!');" class="btn-main" style="background:#4faaf5">Поделиться</button>
+            <button onclick="editRoute()" class="btn-main" style="background:#ffe07a;color:#543">Изменить маршрут</button>
+            <button onclick="window.location='/'" class="btn-main" style="background:#efb0b6">Новый маршрут</button>
+        </div>
+    </div>
+    {% endif %}
+    <div class="footer">
+        &copy; 2024 VibeRoute | Проект для демонстрации AI-маршрутизации.<br>
+        Автор: <a href="mailto:hello@viberoute.ai">hello@viberoute.ai</a>
+    </div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        let waypoints = {{ formdata.waypoints|tojson }};
+        function setBudget(v){ budget_slider.value = budgetValInp.value = v; }
+        function selectVibe(val){
+            document.getElementById('vibe').value=val;
+            document.querySelectorAll('.char-vibe-card').forEach(
+                c=>{c.classList.remove('selected');if(c.getAttribute('data-vibe')===val)c.classList.add('selected');});
+        }
+        // ------- Waypoints controls ------
+        function syncWaypointsFromInputs(){
+            let inputs = document.querySelectorAll('input[name="waypoints"]');
+            waypoints = [];
+            inputs.forEach(i => waypoints.push(i.value));
+        }
+        function addWaypoint(){
+            syncWaypointsFromInputs();
+            waypoints.push('');
+            renderWaypoints();
+        }
+        function removeWaypoint(idx){
+            syncWaypointsFromInputs();
+            waypoints.splice(idx,1);
+            renderWaypoints();
+        }
+        function moveWaypointUp(idx){
+            syncWaypointsFromInputs();
+            if(idx>0){let tmp=waypoints[idx-1];waypoints[idx-1]=waypoints[idx];waypoints[idx]=tmp;}
+            renderWaypoints();
+        }
+        function renderWaypoints(){
+            let wrap=document.getElementById('waypoints_fields');
+            wrap.innerHTML='';
+            for(let i=0;i<waypoints.length;i++){
+                wrap.insertAdjacentHTML('beforeend',
+                    `<div class="waypoint-row" draggable="true" data-idx="${i}">
+                        <input type="text" name="waypoints" value="${waypoints[i]}" placeholder="Добавьте место...">
+                        <button class="waypoint-btn up" type="button" onclick="moveWaypointUp(${i})" ${i==0?"disabled":""}>⬆️</button>
+                        <button class="waypoint-btn remove" type="button" onclick="removeWaypoint(${i})">✖</button>
+                    </div>`
+                );
+            }
+        }
+        document.getElementById('mainform').addEventListener('submit',function(e){
+            let wps=[];
+            document.querySelectorAll('input[name="waypoints"]').forEach(i=>wps.push(i.value));
+            let h=document.createElement('input');h.type="hidden";h.name="waypoints_json";
+            h.value=JSON.stringify(wps);
+            this.appendChild(h);
+        });
+        if(typeof waypoints==='object')renderWaypoints();
+        // Geolocation for start
+        function geoLocateStart(){
+            if (!navigator.geolocation) {
+                alert('Геолокация не поддерживается браузером.');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function(pos){
+                    fetch('/reverse_geocode?lat='+pos.coords.latitude+'&lng='+pos.coords.longitude)
+                        .then(r=>r.json())
+                        .then(res=>{
+                            const inp = document.getElementById('start_addr');
+                            if(inp){
+                                inp.value = res.address || '';
+                                // Обновим карту и внутреннее состояние
+                                inp.dispatchEvent(new Event('input', {bubbles:true}));
+                            }
+                        })
+                        .catch(()=>{
+                            alert('Не удалось получить адрес по геопозиции.');
+                        });
+                },
+                function(err){
+                    let msg = 'Не удалось получить геопозицию.';
+                    if (err.code === 1) msg = 'Доступ к геолокации запрещён в настройках браузера.';
+                    alert(msg);
+                }
+            );
+        }
+        // --- Interactive Map with Leaflet ---
+        let map = L.map('map').setView([55.751244, 37.618423], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        let markers = [];
+        function updateMapMarkers(){
+            markers.forEach(m=>map.removeLayer(m));
+            markers=[];
+            let pts = [];
+            if(document.getElementById('start_addr')&&document.getElementById('start_addr').value)
+                pts.push(document.getElementById('start_addr').value);
+            document.querySelectorAll('input[name="waypoints"]').forEach(i=>{ if(i.value)pts.push(i.value)});
+            if(document.getElementById('end_addr')&&document.getElementById('end_addr').value)
+                pts.push(document.getElementById('end_addr').value);
+            pts.forEach(async function(addr,i){
+                // Emulate geocode: For demo, randomize in center of Moscow
+                let lat=55.75+Math.random()*0.06-0.03, lon=37.61+Math.random()*0.09-0.045;
+                let m=L.marker([lat,lon]).addTo(map);
+                m.bindTooltip(addr).openTooltip();
+                markers.push(m);
+            });
+        }
+        document.getElementById('mainform').addEventListener('input',function(e){
+            setTimeout(updateMapMarkers,200);
+        });
+        setTimeout(updateMapMarkers,600);
+
+        map.on('click', function(e) {
+            // For demo: On map click, fill next empty waypoint or end
+            let lat = e.latlng.lat, lng = e.latlng.lng;
+            fetch('/reverse_geocode?lat='+lat+'&lng='+lng).then(
+                r=>r.json()).then(res=>{
+                    let wps=document.querySelectorAll('input[name="waypoints"]');
+                    let filled=false;
+                    for(let i=0;i<wps.length;i++){ if(!wps[i].value){wps[i].value=res.address;filled=true;break;} }
+                    if(!filled){
+                        let end = document.getElementById('end_addr');
+                        if(end&&!end.value)end.value=res.address;
+                    }
+                    updateMapMarkers();
+                });
+        });
+
+        function editRoute(){
+            window.scrollTo({top:0,behavior:'smooth'});
+            document.getElementById('results').style.display='none';
+        }
+        // Sync budget slider & text
+        window.budget_slider&&budget_slider.addEventListener('input',()=>budgetValInp.value=budget_slider.value);
+        window.budgetValInp&&budgetValInp.addEventListener('input',()=>budget_slider.value=budgetValInp.value);
+    </script>
+</body>
+</html>
