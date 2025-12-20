@@ -1,209 +1,136 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <title>VibeRoute — Твой идеальный маршрут, созданный AI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        html,body{margin:0;padding:0;font-family:system-ui,sans-serif;background:#f7f8fa;}
-        .header{background:white;padding:24px 8vw 16px 8vw;border-bottom:1.5px solid #eaeaea;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;}
-        .logo{font-size:2.2rem;font-weight:700;letter-spacing:1px;color:#fd4e4e;display:flex;flex-direction:row;align-items:center;}
-        .logo img{height:40px;margin-right:14px;}
-        .desc{font-size:1.1rem;color:#646464;}
-        .header-btns{display:flex;gap:8px;}
-        .header-btns button{background:none;border:1px solid #dddb; color:#666; padding:6px 16px; border-radius:28px; cursor:pointer;}
-        .header-btns button:hover{background:#fd4e4e;color:#fff;}
-        .container{display:flex;flex-direction:row;gap:36px;max-width:1120px;margin:36px auto 0 auto;}
-        .leftcol,.rightcol{background:white;border-radius:18px;box-shadow:0 3px 24px rgba(0,0,0,0.03);padding:32px 24px;flex:1;}
-        .leftcol{min-width:308px;max-width:440px;}
-        .rightcol{flex:2;min-width:264px;}
-        .params label{font-weight:600;margin-top:18px;}
-        .param-block{margin-bottom:24px;}
-        .route-pts{margin-bottom:12px;}
-        .waypoint-row{display:flex;align-items:center;margin-bottom:8px;gap:6px;}
-        .waypoint-row input{flex:1;}
-        .waypoint-btn{background:none;border:none;font-size:1.25rem;cursor:pointer;}
-        .waypoint-btn.remove{color:#fd4e4e;}
-        .waypoint-btn.up{color:#5797f8;}
-        .add-wp-btn{
-            margin-top:8px;
-            margin-bottom:10px;
-            padding:7px 14px;
-            border-radius:18px;
-            border:1px dashed #fd4e4e;
-            background:#fff7f7;
-            color:#fd4e4e;
-            font-size:0.9rem;
-            cursor:pointer;
-            transition:background .16s,color .16s,border-color .16s,transform .08s;
-        }
-        .add-wp-btn:hover{
-            background:#fd4e4e;
-            color:#fff;
-            border-style:solid;
-            transform:translateY(-1px);
-        }
-        .btn-main{background:#fd4e4e;border:none;color:white;font-weight:700;font-size:1.17rem;padding:14px 0;border-radius:32px;margin-top:26px;width:100%;cursor:pointer;box-shadow:0 2px 4px #fd4e4e22;}
-        .btn-main:disabled{background:#e0e0e0;color:#aaa;}
-        .char-vibe-cards{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;}
-        .char-vibe-card{flex:1 0 38%;min-width:100px;max-width:156px;display:flex;align-items:center;gap:8px;background:#fafafb;border:1.5px solid #eee;padding:8px 9px;border-radius:20px;cursor:pointer;transition:.16s;}
-        .char-vibe-card.selected{border:2.6px solid #fd4e4e;background:#ffeded;}
-        .char-vibe-card:hover{border:2px solid #fd4e4e22;}
-        .flex{display:flex;}
-        .gap{gap:13px;}
-        .budget-row{flex-wrap:wrap;}
-        .pres-budget{
-            border:1px solid #ddd;
-            background:#f5f6fa;
-            padding:6px 10px;
-            border-radius:18px;
-            font-size:0.86rem;
-            cursor:pointer;
-            white-space:nowrap;
-            transition:background .16s,color .16s,border-color .16s;
-        }
-        .pres-budget:hover{
-            background:#fd4e4e;
-            border-color:#fd4e4e;
-            color:#fff;
-        }
-        .slider-label{margin-right:10px;display:inline-block; font-size:0.99rem;}
-        input[type="text"],
-        input[type="number"],
-        select{
-            border-radius:10px;
-            border:1px solid #ddd;
-            padding:7px 10px;
-            font-size:0.95rem;
-            box-sizing:border-box;
-            outline:none;
-            transition:border-color .16s,box-shadow .16s,background .16s;
-        }
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        select:focus{
-            border-color:#fd4e4e;
-            box-shadow:0 0 0 2px #fd4e4e22;
-            background:#fffdfd;
-        }
-        .result-area{background:white;box-shadow:0 3px 24px rgba(0,0,0,0.04);border-radius:18px;margin:28px auto 0 auto;max-width:1120px;padding:32px 13vw 24px 13vw;}
-        .result-h{margin-bottom:0;font-size:2.01rem;}
-        .result-metrics{display:flex;flex-wrap:wrap;gap:26px;margin-top:16px;margin-bottom:24px;}
-        .metric{background:#f4f6fb;border-radius:11px;padding:14px 22px;min-width:120px;display:flex;flex-direction:column;align-items:center;}
-        .metric-label{font-size:1.08rem;color:#666;}
-        .metric-val{font-size:1.4rem;font-weight:700;}
-        .step-list{margin:0;padding:0;}
-        .step-item{margin-top:20px;background:#f8f8fa;border-radius:12px;padding:19px 15px;}
-        .step-item img{width:180px;border-radius:10px;box-shadow:0 1px 5px #0002;}
-        .step-geolink{font-size:0.99rem;color:#5797f8;font-weight:600;text-decoration:none;}
-        .segment-info{margin:6px 0 3px 0;color:#888;font-size:0.99rem;}
-        .tips-block{background:#e8ffd8;border-radius:9px;padding:8px 17px;color:#235d0c;margin-top:14px;font-size:1.02rem;}
-        .actions{display:flex;gap:16px;margin-top:24px;}
-        .footer{background:#fcfcfc;padding:26px 0 15px 0;margin-top:54px;border-top:1.5px solid #eaeaea;font-size:0.98rem;color:#888;text-align:center;}
-        @media(max-width:900px){
-            .container{flex-direction:column;gap:23px;padding:0 1vw;}
-            .leftcol,.rightcol{max-width:none;}
-            .result-area{padding:28px 1vw;}
-        }
-        @media(max-width:600px){
-            .header{flex-direction:column;align-items:flex-start;padding:19px 3vw;}
-            .container,.result-area{padding:0;}
-            .leftcol,.rightcol{padding:17px 4vw;}
-        }
-    </style>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
 </head>
+
 <body>
     <div class="header">
         <div class="logo">
-            <img src="https://raw.githubusercontent.com/streamlit/brand/main/logos/streamlit-logo-primary-colormark-darktext.png" alt="logo">
+            <img src="https://raw.githubusercontent.com/streamlit/brand/main/logos/streamlit-logo-primary-colormark-darktext.png"
+                alt="logo">
             VibeRoute
         </div>
         <div class="desc">Твой идеальный маршрут, созданный AI</div>
         <div class="header-btns">
-            <button onclick="alert('VibeRoute — сервис планирования прогулок и маршрутов по настроению, бюджету и времени. Powered by AI.')">О проекте</button>
+            <button
+                onclick="alert('VibeRoute — сервис планирования прогулок и маршрутов по настроению, бюджету и времени. Powered by AI.')">О
+                проекте</button>
             <button onclick="window.location='mailto:hello@viberoute.ai'">Контакты</button>
         </div>
     </div>
     <form id="mainform" method="post" style="margin:0;padding:0;">
-    <div class="container">
-        <div class="leftcol">
-            <div class="params">
-                <div class="param-block route-pts">
-                    <label for="start_addr">Откуда начать?</label>
-                    <div style="display:flex;gap:10px;margin-bottom:6px;">
-                        <input type="text" id="start_addr" name="start_addr" placeholder="Введите адрес..." 
-                            style="flex:1;" value="{{ formdata.start_addr|default('')}}">
-                        <button type="button" onclick="geoLocateStart()" title="Использовать геопозицию" style="border:none;background:none;cursor:pointer;font-size:1.35rem;">📍</button>
-                    </div>
-                    
-                    <label>Куда хочешь зайти? <span style="font-weight:normal;">(промежуточные точки)</span></label>
-                    <div id="waypoints_fields">
-                        {% for pt in formdata.waypoints %}
-                        <div class="waypoint-row" draggable="true" data-idx="{{ loop.index0 }}">
-                            <input type="text" name="waypoints" value="{{ pt }}" placeholder="Добавьте место...">
-                            <button class="waypoint-btn up" type="button" onclick="moveWaypointUp({{ loop.index0 }})" title="Вверх" {% if loop.first %}disabled{% endif %}>⬆️</button>
-                            <button class="waypoint-btn remove" type="button" onclick="removeWaypoint({{ loop.index0 }})">✖</button>
+        <div class="container">
+            <div class="leftcol">
+                <div class="params">
+                    <div class="param-block route-pts">
+                        <label for="start_addr">Откуда начать?</label>
+                        <div style="display:flex;gap:10px;margin-bottom:6px;">
+                            <input type="text" id="start_addr" name="start_addr" placeholder="Введите адрес..."
+                                style="flex:1;" value="{{ formdata.start_addr|default('')}}">
+                            <button type="button" onclick="geoLocateStart()" title="Использовать геопозицию"
+                                style="border:none;background:none;cursor:pointer;font-size:1.35rem;">📍</button>
                         </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="add-wp-btn" onclick="addWaypoint()">+ Добавить место</button>
-                    
-                    <label for="end_addr" style="margin-top:16px;">Куда хочешь прийти?</label>
-                    <input type="text" id="end_addr" name="end_addr" placeholder="Введите адрес..." value="{{ formdata.end_addr|default('') }}">
-                </div>
-                <div class="param-block walk-details">
-                    <label>Длительность прогулки</label>
-                    <div class="flex gap" style="margin-top:5px;">
-                        <select name="duration_hrs" style="font-size:1rem;">
-                            {% for i in range(1,9) %}
-                            <option value="{{i}}" {% if formdata.duration_hrs==i %}selected{% endif %}>{{i}} ч</option>
+                        <!-- Скрытые поля для координат начального местоположения -->
+                        <input type="hidden" id="start_lat" name="start_lat" value="{{ formdata.start_lat|default('') }}">
+                        <input type="hidden" id="start_lng" name="start_lng" value="{{ formdata.start_lng|default('') }}">
+
+                        <!-- Скрытые поля для сохранения состояния карты -->
+                        <input type="hidden" id="map_lat" name="map_lat" value="{{ formdata.map_lat|default('') }}">
+                        <input type="hidden" id="map_lng" name="map_lng" value="{{ formdata.map_lng|default('') }}">
+                        <input type="hidden" id="map_zoom" name="map_zoom" value="{{ formdata.map_zoom|default('') }}">
+
+                        <!-- <label>Куда хочешь зайти? <span style="font-weight:normal;">(промежуточные точки)</span></label> -->
+                        <div id="waypoints_fields">
+                            {% for pt in formdata.waypoints %}
+                            <div class="waypoint-row" draggable="true" data-idx="{{ loop.index0 }}">
+                                <input type="text" name="waypoints" value="{{ pt }}" placeholder="Добавьте место...">
+                                <button class="waypoint-btn up" type="button"
+                                    onclick="moveWaypointUp({{ loop.index0 }})" title="Вверх" {% if loop.first
+                                    %}disabled{% endif %}>⬆️</button>
+                                <button class="waypoint-btn remove" type="button"
+                                    onclick="removeWaypoint({{ loop.index0 }})">✖</button>
+                            </div>
                             {% endfor %}
-                        </select>
-                        <select name="duration_mins" style="font-size:1rem;">
-                            {% for mins in [0,15,30,45] %}
-                            <option value="{{mins}}" {% if formdata.duration_mins==mins %}selected{% endif %}>{{ "0" if mins==0 else mins }} мин</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <label style="margin-top:17px;">Бюджет на человека <span style="font-size:0.98em;color:#aaa;">(₽)</span></label>
-                    <div class="flex gap budget-row" style="margin-top:5px;align-items:center;">
-                        <input type="range" min="500" max="10000" step="100" value="{{ formdata.budget|default(2000) }}" id="budget_slider"
-                            style="width:110px;" onchange="budgetValInp.value=this.value">
-                        <span class="slider-label"><input type="number" name="budget" min="500" max="10000" step="100" 
-                            id="budgetValInp" value="{{ formdata.budget|default(2000) }}" 
-                            style="width:65px;" oninput="budget_slider.value=this.value"></span>
-                        <button type="button" class="pres-budget" onclick="setBudget(1000)">Эконом</button>
-                        <button type="button" class="pres-budget" onclick="setBudget(3000)">Средний</button>
-                        <button type="button" class="pres-budget" onclick="setBudget(6000)">Комфортный</button>
-                        <button type="button" class="pres-budget" onclick="setBudget(10000)">Безлимитный</button>
-                    </div>
-                    
-                    <label style="margin-top:17px;">Характер прогулки</label>
-                    <div class="char-vibe-cards" id="vibe-cards">
-                        {% for v in vibes %}
-                        <div class="char-vibe-card {% if formdata.vibe==v[0] %}selected{% endif %}" data-vibe="{{v[0]}}" onclick="selectVibe('{{v[0]}}')">
-                            <span>{{v[1]}}</span> <span>{{v[2]}}</span>
                         </div>
-                        {% endfor %}
+                        <!-- <button type="button" class="add-wp-btn" onclick="addWaypoint()">+ Добавить место</button> -->
+                        <label for="end_addr" style="margin-top:16px;">Куда хочешь прийти?</label>
+                        <div style="display:flex;gap:10px;margin-bottom:6px;">
+                            <input type="text" id="end_addr" name="end_addr" placeholder="Введите адрес..."
+                                style="flex:1;" value="{{ formdata.end_addr|default('') }}">
+                            <button type="button" onclick="geoLocateEnd()" title="Указать конечную точку по геопозиции"
+                                style="border:none;background:none;cursor:pointer;font-size:1.35rem;">
+                                📍
+                            </button>
+                        </div>
+                        <input type="hidden" id="end_lat" name="end_lat" value="{{ formdata.end_lat|default('') }}">
+                        <input type="hidden" id="end_lng" name="end_lng" value="{{ formdata.end_lng|default('') }}">
+                        <!-- <label for="end_addr" style="margin-top:16px;">Куда хочешь прийти?</label>
+                    <button type="button" onclick="geoLocateStart()" title="Использовать геопозицию" style="border:none;background:none;cursor:pointer;font-size:1.35rem;">📍</button>
+
+                    <input type="text" id="end_addr" name="end_addr" placeholder="Введите адрес..." value="{{ formdata.end_addr|default('') }}"> -->
                     </div>
-                    <input type="hidden" id="vibe" name="vibe" value="{{ formdata.vibe|default('romantic') }}">
-                    
-                    <label style="margin-top:15px;">Свои пожелания</label>
-                    <input type="text" name="extra_notes" placeholder="Опишите ваши пожелания..." 
-                        value="{{ formdata.extra_notes|default('') }}" style="width:100%;">
+                    <div class="param-block walk-details">
+                        <label>Длительность прогулки</label>
+                        <div class="flex gap budget-row" style="margin-top:5px;align-items:center;">
+                            <input type="range" min="60" max="480" step="15"
+                                value="{{ formdata.duration_hrs|default(2)*60 + formdata.duration_mins|default(0) }}"
+                                id="duration_slider" style="flex:1;" oninput="updateDurationLabel(this.value)">
+                            <span class="slider-label" style="width:90px;">
+                                <span id="durationLabel">{{ formdata.duration_hrs|default(2) }} ч {{
+                                    formdata.duration_mins|default(0) }} мин</span>
+                            </span>
+                            <input type="hidden" name="duration_hrs" id="duration_hrs">
+                            <input type="hidden" name="duration_mins" id="duration_mins">
+                        </div>
+
+
+                        <label style="margin-top:17px;">Бюджет на человека <span
+                                style="font-size:0.98em;color:#aaa;">(₽)</span></label>
+                        <div class="flex gap budget-row" style="margin-top:5px;align-items:center;">
+                            <input type="range" min="500" max="10000" step="100"
+                                value="{{ formdata.budget|default(2000) }}" id="budget_slider" style="width:110px;"
+                                onchange="budgetValInp.value=this.value">
+                            <span class="slider-label"><input type="number" name="budget" min="500" max="10000"
+                                    step="100" id="budgetValInp" value="{{ formdata.budget|default(2000) }}"
+                                    style="width:90px;" oninput="budget_slider.value=this.value"></span>
+                            <button type="button" class="pres-budget" onclick="setBudget(1000)">Эконом</button>
+                            <button type="button" class="pres-budget" onclick="setBudget(3000)">Средний</button>
+                            <button type="button" class="pres-budget" onclick="setBudget(6000)">Комфортный</button>
+                            <button type="button" class="pres-budget" onclick="setBudget(10000)">Безлимитный</button>
+                        </div>
+
+                        <label style="margin-top:17px;">Характер прогулки</label>
+                        <div class="char-vibe-cards" id="vibe-cards">
+                            {% for v in vibes %}
+                            <div class="char-vibe-card {% if formdata.vibe==v[0] %}selected{% endif %}"
+                                data-vibe="{{v[0]}}" onclick="selectVibe('{{v[0]}}')">
+                                <span>{{v[1]}}</span> <span>{{v[2]}}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" id="vibe" name="vibe" value="{{ formdata.vibe|default('romantic') }}">
+
+                        <label style="margin-top:15px;">Свои пожелания</label>
+                        <textarea name="extra_notes" placeholder="Опишите ваши пожелания..." style="width:100%;min-height:120px;resize:vertical;">{{ formdata.extra_notes|default('') }}</textarea>
+                    </div>
+                    <button class="btn-main" type="submit" id="submitBtn" {% if loading %}disabled{% endif %}>
+                        {% if loading %}<span id="spinner">⏳</span> Генерируем...{% else %}Создать Маршрут{% endif %}
+                    </button>
                 </div>
-                <button class="btn-main" type="submit" id="submitBtn" {% if loading %}disabled{% endif %}>
-                    {% if loading %}<span id="spinner">⏳</span> Генерируем...{% else %}Создать Маршрут{% endif %}
-                </button>
+            </div>
+            <div class="rightcol">
+                <div id="map" style="width:100%;height:700px;border-radius:14px;box-shadow:0 1px 8px #0002;"></div>
+                <div style="font-size:.98em;color:#aaa;margin-top:10px;">* Маркеры появятся по мере заполнения точек.
+                    Кликните по карте для добавления.</div>
             </div>
         </div>
-        <div class="rightcol">
-            <div id="map" style="width:100%;height:360px;border-radius:14px;box-shadow:0 1px 8px #0002;"></div>
-            <div style="font-size:.98em;color:#aaa;margin-top:10px;">* Маркеры появятся по мере заполнения точек. Кликните по карте для добавления.</div>
-        </div>
-    </div>
     </form>
     {% if generated %}
     <div class="result-area" id="results">
@@ -233,8 +160,9 @@
                 <div><b>{{ loop.index }}. {{ step.name }}</b></div>
                 <div style="margin:7px 0 7px 0;">{{ step.desc }}</div>
                 <div style="margin:7px 0 7px 0;color:#534">
-                    <b>Бюджет:</b> {{ step.budget }}</div>
-                <img src="{{step.img}}" alt="img места" loading="lazy"/>
+                    <b>Бюджет:</b> {{ step.budget }}
+                </div>
+                <img src="{{step.img}}" alt="img места" loading="lazy" />
                 <br>
                 <a href="{{step.map_link}}" target="_blank" class="step-geolink">Посмотреть на карте</a>
                 {% if step.segment %}
@@ -247,149 +175,566 @@
             {{ result_data.tips|safe }}
         </div>
         <div class="actions">
-            <button onclick="alert('Сохранить можно будет после входа!')" class="btn-main" style="background:#a8d18a">Сохранить маршрут</button>
-            <button onclick="navigator.clipboard.writeText(window.location.href);alert('Ссылка на маршрут скопирована!');" class="btn-main" style="background:#4faaf5">Поделиться</button>
-            <button onclick="editRoute()" class="btn-main" style="background:#ffe07a;color:#543">Изменить маршрут</button>
+            <button onclick="alert('Сохранить можно будет после входа!')" class="btn-main"
+                style="background:#a8d18a">Сохранить маршрут</button>
+            <button
+                onclick="navigator.clipboard.writeText(window.location.href);alert('Ссылка на маршрут скопирована!');"
+                class="btn-main" style="background:#4faaf5">Поделиться</button>
+            <button onclick="editRoute()" class="btn-main" style="background:#ffe07a;color:#543">Изменить
+                маршрут</button>
             <button onclick="window.location='/'" class="btn-main" style="background:#efb0b6">Новый маршрут</button>
         </div>
     </div>
     {% endif %}
-    <div class="footer">
-        &copy; 2024 VibeRoute | Проект для демонстрации AI-маршрутизации.<br>
-        Автор: <a href="mailto:hello@viberoute.ai">hello@viberoute.ai</a>
-    </div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
     <script>
-        let waypoints = {{ formdata.waypoints|tojson }};
-        function setBudget(v){ budget_slider.value = budgetValInp.value = v; }
-        function selectVibe(val){
-            document.getElementById('vibe').value=val;
+        const durationSlider = document.getElementById('duration_slider');
+        const durationLabel = document.getElementById('durationLabel');
+        const durationHoursInput = document.getElementById('duration_hrs');
+        const durationMinsInput = document.getElementById('duration_mins');
+
+        function updateDurationLabel(value) {
+            const hours = Math.floor(value / 60);
+            const mins = value % 60;
+            durationLabel.textContent = `${hours} ч ${mins} мин`;
+            durationHoursInput.value = hours;
+            durationMinsInput.value = mins;
+        }
+
+        // Инициализация при загрузке страницы
+        updateDurationLabel(durationSlider.value);
+        let waypoints = {{ formdata.waypoints| tojson }};
+        function setBudget(v) { budget_slider.value = budgetValInp.value = v; }
+        function selectVibe(val) {
+            document.getElementById('vibe').value = val;
             document.querySelectorAll('.char-vibe-card').forEach(
-                c=>{c.classList.remove('selected');if(c.getAttribute('data-vibe')===val)c.classList.add('selected');});
+                c => { c.classList.remove('selected'); if (c.getAttribute('data-vibe') === val) c.classList.add('selected'); });
         }
         // ------- Waypoints controls ------
-        function syncWaypointsFromInputs(){
+        function syncWaypointsFromInputs() {
             let inputs = document.querySelectorAll('input[name="waypoints"]');
             waypoints = [];
             inputs.forEach(i => waypoints.push(i.value));
         }
-        function addWaypoint(){
+        function addWaypoint() {
             syncWaypointsFromInputs();
             waypoints.push('');
             renderWaypoints();
         }
-        function removeWaypoint(idx){
+        function removeWaypoint(idx) {
             syncWaypointsFromInputs();
-            waypoints.splice(idx,1);
+            waypoints.splice(idx, 1);
             renderWaypoints();
         }
-        function moveWaypointUp(idx){
+        function moveWaypointUp(idx) {
             syncWaypointsFromInputs();
-            if(idx>0){let tmp=waypoints[idx-1];waypoints[idx-1]=waypoints[idx];waypoints[idx]=tmp;}
+            if (idx > 0) { let tmp = waypoints[idx - 1]; waypoints[idx - 1] = waypoints[idx]; waypoints[idx] = tmp; }
             renderWaypoints();
         }
-        function renderWaypoints(){
-            let wrap=document.getElementById('waypoints_fields');
-            wrap.innerHTML='';
-            for(let i=0;i<waypoints.length;i++){
+        function renderWaypoints() {
+            let wrap = document.getElementById('waypoints_fields');
+            wrap.innerHTML = '';
+            for (let i = 0; i < waypoints.length; i++) {
                 wrap.insertAdjacentHTML('beforeend',
                     `<div class="waypoint-row" draggable="true" data-idx="${i}">
                         <input type="text" name="waypoints" value="${waypoints[i]}" placeholder="Добавьте место...">
-                        <button class="waypoint-btn up" type="button" onclick="moveWaypointUp(${i})" ${i==0?"disabled":""}>⬆️</button>
+                        <button class="waypoint-btn up" type="button" onclick="moveWaypointUp(${i})" ${i == 0 ? "disabled" : ""}>⬆️</button>
                         <button class="waypoint-btn remove" type="button" onclick="removeWaypoint(${i})">✖</button>
                     </div>`
                 );
             }
         }
-        document.getElementById('mainform').addEventListener('submit',function(e){
-            let wps=[];
-            document.querySelectorAll('input[name="waypoints"]').forEach(i=>wps.push(i.value));
-            let h=document.createElement('input');h.type="hidden";h.name="waypoints_json";
-            h.value=JSON.stringify(wps);
+        document.getElementById('mainform').addEventListener('submit', function (e) {
+            let wps = [];
+            document.querySelectorAll('input[name="waypoints"]').forEach(i => wps.push(i.value));
+            let h = document.createElement('input'); h.type = "hidden"; h.name = "waypoints_json";
+            h.value = JSON.stringify(wps);
             this.appendChild(h);
-        });
-        if(typeof waypoints==='object')renderWaypoints();
-        // Geolocation for start
-        function geoLocateStart(){
-            if (!navigator.geolocation) {
-                alert('Геолокация не поддерживается браузером.');
-                return;
+
+            // Сохраняем текущие центр и зум карты, чтобы после POST она не сбрасывалась на Москву
+            if (map) {
+                const c = map.getCenter();
+                const latField = document.getElementById('map_lat');
+                const lngField = document.getElementById('map_lng');
+                const zoomField = document.getElementById('map_zoom');
+                if (latField) latField.value = c.lat;
+                if (lngField) lngField.value = c.lng;
+                if (zoomField) zoomField.value = map.getZoom();
             }
-            navigator.geolocation.getCurrentPosition(
-                function(pos){
-                    fetch('/reverse_geocode?lat='+pos.coords.latitude+'&lng='+pos.coords.longitude)
-                        .then(r=>r.json())
-                        .then(res=>{
-                            const inp = document.getElementById('start_addr');
-                            if(inp){
-                                inp.value = res.address || '';
-                                // Обновим карту и внутреннее состояние
-                                inp.dispatchEvent(new Event('input', {bubbles:true}));
-                            }
-                        })
-                        .catch(()=>{
-                            alert('Не удалось получить адрес по геопозиции.');
-                        });
-                },
-                function(err){
-                    let msg = 'Не удалось получить геопозицию.';
-                    if (err.code === 1) msg = 'Доступ к геолокации запрещён в настройках браузера.';
-                    alert(msg);
-                }
-            );
-        }
+
+            // Заполняем скрытые поля координатами начального местоположения
+            if (currentLocationCoords) {
+                const latField = document.getElementById('start_lat');
+                const lngField = document.getElementById('start_lng');
+                if (latField) latField.value = currentLocationCoords.lat;
+                if (lngField) lngField.value = currentLocationCoords.lng;
+            }
+            // Заполняем скрытые поля координат КОНЕЧНОЙ точки
+            if (endLocationCoords) {
+                const latField = document.getElementById('end_lat');
+                const lngField = document.getElementById('end_lng');
+                if (latField) latField.value = endLocationCoords.lat;
+                if (lngField) lngField.value = endLocationCoords.lng;
+            }
+
+        });
+        if (typeof waypoints === 'object') renderWaypoints();
+
         // --- Interactive Map with Leaflet ---
-        let map = L.map('map').setView([55.751244, 37.618423], 12);
+        const mapLatField = document.getElementById('map_lat');
+        const mapLngField = document.getElementById('map_lng');
+        const mapZoomField = document.getElementById('map_zoom');
+
+        const initialLat = parseFloat(mapLatField && mapLatField.value) || 55.751244;
+        const initialLng = parseFloat(mapLngField && mapLngField.value) || 37.618423;
+        const initialZoom = parseInt(mapZoomField && mapZoomField.value) || 12;
+
+        let map = L.map('map').setView([initialLat, initialLng], initialZoom);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
         let markers = [];
-        function updateMapMarkers(){
-            markers.forEach(m=>map.removeLayer(m));
-            markers=[];
-            let pts = [];
-            if(document.getElementById('start_addr')&&document.getElementById('start_addr').value)
-                pts.push(document.getElementById('start_addr').value);
-            document.querySelectorAll('input[name="waypoints"]').forEach(i=>{ if(i.value)pts.push(i.value)});
-            if(document.getElementById('end_addr')&&document.getElementById('end_addr').value)
-                pts.push(document.getElementById('end_addr').value);
-            pts.forEach(async function(addr,i){
-                // Emulate geocode: For demo, randomize in center of Moscow
-                let lat=55.75+Math.random()*0.06-0.03, lon=37.61+Math.random()*0.09-0.045;
-                let m=L.marker([lat,lon]).addTo(map);
-                m.bindTooltip(addr).openTooltip();
-                markers.push(m);
+        let currentLocationCoords = null; // Сохраняем координаты текущего местоположения
+        let currentLocationMarker = null;
+        let endLocationMarker = null;
+        let endLocationCoords = null;
+        // Сохраняем маркер текущего местоположения
+
+        // Восстанавливаем координаты старт/финиш после POST из hidden-полей
+        const startLatHidden = parseFloat(document.getElementById('start_lat')?.value || '');
+        const startLngHidden = parseFloat(document.getElementById('start_lng')?.value || '');
+        if (Number.isFinite(startLatHidden) && Number.isFinite(startLngHidden)) {
+            currentLocationCoords = { lat: startLatHidden, lng: startLngHidden };
+        }
+
+        const endLatHidden = parseFloat(document.getElementById('end_lat')?.value || '');
+        const endLngHidden = parseFloat(document.getElementById('end_lng')?.value || '');
+        if (Number.isFinite(endLatHidden) && Number.isFinite(endLngHidden)) {
+            endLocationCoords = { lat: endLatHidden, lng: endLngHidden };
+        }
+
+        // Функция для обновления адреса по координатам
+        function updateAddressFromCoords(lat, lng, marker) {
+            fetch('/reverse_geocode?lat=' + lat + '&lng=' + lng)
+                .then(r => r.json())
+                .then(res => {
+                    const inp = document.getElementById('start_addr');
+                    if (inp) {
+                        inp.value = res.address || '';
+                    }
+                    if (marker) {
+                        marker.setTooltipContent('Старт: ' + (res.address || ''));
+                    }
+                    // Обновляем сохранённые координаты
+                    currentLocationCoords = { lat: lat, lng: lng };
+                })
+                .catch(() => {
+                    const inp = document.getElementById('start_addr');
+                    if (inp) {
+                        inp.value = `${lat}, ${lng}`;
+                    }
+                    if (marker) {
+                        marker.setTooltipContent('Старт: ' + `${lat}, ${lng}`);
+                    }
+                });
+        }
+
+        // Функция для создания цветной иконки маркера
+        function createColoredIcon(color, type) {
+            return L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: ${color}; width: 25px; height: 25px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [25, 25],
+                iconAnchor: [12, 25],
+                popupAnchor: [0, -25]
             });
         }
-        document.getElementById('mainform').addEventListener('input',function(e){
-            setTimeout(updateMapMarkers,200);
-        });
-        setTimeout(updateMapMarkers,600);
 
-        map.on('click', function(e) {
+        // Geolocation for start
+        function geoLocateStart() {
+            console.log('geoLocateStart вызвана');
+            if (!navigator.geolocation) {
+                alert('Геолокация не поддерживается браузером.');
+                return;
+            }
+            if (!map) {
+                alert('Карта ещё не загружена. Подождите немного и попробуйте снова.');
+                return;
+            }
+            console.log('Запрашиваем геолокацию...');
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    console.log('Геолокация получена:', pos.coords.latitude, pos.coords.longitude);
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+
+                    // Удаляем старый маркер, если есть
+                    if (currentLocationMarker) {
+                        map.removeLayer(currentLocationMarker);
+                        const idx = markers.indexOf(currentLocationMarker);
+                        if (idx > -1) markers.splice(idx, 1);
+                    }
+
+                    // Сохраняем координаты
+                    currentLocationCoords = { lat: lat, lng: lng };
+
+                    // Создаём перетаскиваемый маркер старта (зелёный)
+                    const m = L.marker([lat, lng], {
+                        draggable: true,
+                        icon: createColoredIcon('#4CAF50', 'start')
+                    }).addTo(map);
+                    const startInp = document.getElementById('start_addr');
+                    m.bindTooltip('Старт: ' + ((startInp && startInp.value) ? startInp.value : '')).openTooltip();
+                    markers.push(m);
+                    currentLocationMarker = m;
+
+                    // При перетаскивании маркера обновляем координаты и адрес
+                    m.on('dragend', function (e) {
+                        const newLat = e.target.getLatLng().lat;
+                        const newLng = e.target.getLatLng().lng;
+                        updateAddressFromCoords(newLat, newLng, m);
+                    });
+
+                    // Центрируем карту на текущем местоположении
+                    map.setView([lat, lng], 15);
+
+                    // Получаем адрес по координатам
+                    updateAddressFromCoords(lat, lng, m);
+                },
+                function (err) {
+                    console.error('Ошибка геолокации:', err);
+                    let msg = 'Не удалось получить геопозицию.';
+                    if (err.code === 1) msg = 'Доступ к геолокации запрещён в настройках браузера.';
+                    else if (err.code === 2) msg = 'Геопозиция недоступна.';
+                    else if (err.code === 3) msg = 'Превышено время ожидания запроса геолокации.';
+                    alert(msg);
+                }
+            );
+        }
+        function geoLocateEnd() {
+            if (!navigator.geolocation) {
+                alert('Геолокация не поддерживается браузером.');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    endLocationCoords = { lat: lat, lng: lng };
+
+                    // Удаляем старый маркер конца, если был
+                    if (endLocationMarker) {
+                        map.removeLayer(endLocationMarker);
+                        const idx = markers.indexOf(endLocationMarker);
+                        if (idx > -1) markers.splice(idx, 1);
+                    }
+
+                    // Создаём маркер конца (красный)
+                    const m = L.marker([lat, lng], {
+                        draggable: true,
+                        icon: createColoredIcon('#F44336', 'end')
+                    }).addTo(map);
+
+                    m.bindTooltip('Конечная точка').openTooltip();
+                    markers.push(m);
+                    endLocationMarker = m;
+
+                    // Центрируем карту
+                    map.setView([lat, lng], 15);
+
+                    // Обновляем адрес в поле
+                    fetch('/reverse_geocode?lat=' + lat + '&lng=' + lng)
+                        .then(r => r.json())
+                        .then(res => {
+                            const inp = document.getElementById('end_addr');
+                            if (inp) inp.value = res.address || '';
+                            m.setTooltipContent('Конец: ' + (res.address || ''));
+                        });
+
+                    // При перетаскивании обновляем адрес
+                    m.on('dragend', function (e) {
+                        const p = e.target.getLatLng();
+
+                        endLocationCoords = { lat: p.lat, lng: p.lng };
+
+                        fetch('/reverse_geocode?lat=' + p.lat + '&lng=' + p.lng)
+                            .then(r => r.json())
+                            .then(res => {
+                                const inp = document.getElementById('end_addr');
+                                if (inp) inp.value = res.address || '';
+                                m.setTooltipContent('Конец: ' + (res.address || ''));
+                            });
+                    });
+
+                },
+                function (err) {
+                    alert('Не удалось получить геопозицию.');
+                }
+            );
+        }
+
+        // Делаем функцию доступной глобально
+        window.geoLocateStart = geoLocateStart;
+        window.geoLocateEnd = geoLocateEnd;
+
+
+        function updateMapMarkers() {
+            // Удаляем все маркеры, кроме маркера текущего местоположения и маркера конечной точки
+            markers.forEach(m => {
+                if (m !== currentLocationMarker && m !== endLocationMarker) {
+                    map.removeLayer(m);
+                }
+            });
+            // Очищаем массив, но сохраняем нужные маркеры
+            markers = [];
+            if (currentLocationMarker) markers.push(currentLocationMarker);
+            if (endLocationMarker) markers.push(endLocationMarker);
+
+            // Создаём маркеры для всех точек
+            const startInp = document.getElementById('start_addr');
+            const endInp = document.getElementById('end_addr');
+            const waypointInputs = document.querySelectorAll('input[name="waypoints"]');
+
+            // Стартовая точка (зелёный цвет) - только если нет маркера текущего местоположения
+            if (startInp && startInp.value && !currentLocationMarker) {
+                let lat, lon;
+                if (currentLocationCoords) {
+                    lat = currentLocationCoords.lat;
+                    lon = currentLocationCoords.lng;
+                } else {
+                    lat = 55.75 + Math.random() * 0.06 - 0.03;
+                    lon = 37.61 + Math.random() * 0.09 - 0.045;
+                }
+                const startMarker = L.marker([lat, lon], {
+                    draggable: true,
+                    icon: createColoredIcon('#4CAF50', 'start')
+                }).addTo(map);
+                startMarker.bindTooltip('Старт: ' + startInp.value).openTooltip();
+
+                // При перетаскивании обновляем адрес
+                startMarker.on('dragend', function (e) {
+                    const newLat = e.target.getLatLng().lat;
+                    const newLng = e.target.getLatLng().lng;
+                    updateAddressFromCoords(newLat, newLng, null);
+                });
+
+                markers.push(startMarker);
+                currentLocationMarker = startMarker;
+            }
+
+            // Промежуточные точки (синий цвет)
+            waypointInputs.forEach((input, idx) => {
+                if (input.value) {
+                    const lat = 55.75 + Math.random() * 0.06 - 0.03;
+                    const lon = 37.61 + Math.random() * 0.09 - 0.045;
+
+                    const waypointMarker = L.marker([lat, lon], {
+                        draggable: true,
+                        icon: createColoredIcon('#2196F3', 'waypoint')
+                    }).addTo(map);
+                    waypointMarker.bindTooltip('Промежуточная точка: ' + input.value).openTooltip();
+
+                    // При перетаскивании обновляем адрес в соответствующем поле
+                    waypointMarker.on('dragend', function (e) {
+                        const newLat = e.target.getLatLng().lat;
+                        const newLng = e.target.getLatLng().lng;
+                        fetch('/reverse_geocode?lat=' + newLat + '&lng=' + newLng)
+                            .then(r => r.json())
+                            .then(res => {
+                                input.value = res.address || '';
+                                waypointMarker.setTooltipContent('Промежуточная точка: ' + (res.address || input.value));
+                            })
+                            .catch(() => {
+                                input.value = `${newLat}, ${newLng}`;
+                            });
+                    });
+
+                    markers.push(waypointMarker);
+                }
+            });
+
+            // Конечная точка (красный цвет)
+            if (endInp && endInp.value) {
+                if (!endLocationMarker) {
+                    let lat, lon;
+                    if (endLocationCoords) {
+                        lat = endLocationCoords.lat;
+                        lon = endLocationCoords.lng;
+                    } else {
+                        lat = 55.75 + Math.random() * 0.06 - 0.03;
+                        lon = 37.61 + Math.random() * 0.09 - 0.045;
+                    }
+
+                    const endMarker = L.marker([lat, lon], {
+                        draggable: true,
+                        icon: createColoredIcon('#F44336', 'end')
+                    }).addTo(map);
+                    endMarker.bindTooltip('Конец: ' + endInp.value).openTooltip();
+
+                    // При перетаскивании обновляем адрес
+                    endMarker.on('dragend', function (e) {
+                        const newLat = e.target.getLatLng().lat;
+                        const newLng = e.target.getLatLng().lng;
+                        endLocationCoords = { lat: newLat, lng: newLng };
+                        fetch('/reverse_geocode?lat=' + newLat + '&lng=' + newLng)
+                            .then(r => r.json())
+                            .then(res => {
+                                endInp.value = res.address || '';
+                                endMarker.setTooltipContent('Конец: ' + (res.address || endInp.value));
+                            })
+                            .catch(() => {
+                                endInp.value = `${newLat}, ${newLng}`;
+                            });
+                    });
+
+                    markers.push(endMarker);
+                    endLocationMarker = endMarker;
+                } else {
+                    // Если маркер уже существует — обновим подпись и (если есть) координаты
+                    endLocationMarker.setTooltipContent('Конец: ' + endInp.value);
+                    if (endLocationCoords) {
+                        endLocationMarker.setLatLng([endLocationCoords.lat, endLocationCoords.lng]);
+                    }
+                }
+            }
+        }
+
+        document.getElementById('mainform').addEventListener('input', function (e) {
+            setTimeout(updateMapMarkers, 200);
+        });
+        setTimeout(updateMapMarkers, 600);
+
+        map.on('click', function (e) {
             // For demo: On map click, fill next empty waypoint or end
             let lat = e.latlng.lat, lng = e.latlng.lng;
-            fetch('/reverse_geocode?lat='+lat+'&lng='+lng).then(
-                r=>r.json()).then(res=>{
-                    let wps=document.querySelectorAll('input[name="waypoints"]');
-                    let filled=false;
-                    for(let i=0;i<wps.length;i++){ if(!wps[i].value){wps[i].value=res.address;filled=true;break;} }
-                    if(!filled){
+            fetch('/reverse_geocode?lat=' + lat + '&lng=' + lng).then(
+                r => r.json()).then(res => {
+
+                    let wps = document.querySelectorAll('input[name="waypoints"]');
+                    let filled = false;
+                    for (let i = 0; i < wps.length; i++) { if (!wps[i].value) { wps[i].value = res.address; filled = true; break; } }
+                    if (!filled) {
                         let end = document.getElementById('end_addr');
-                        if(end&&!end.value)end.value=res.address;
+                        if (end && !end.value) end.value = res.address;
                     }
                     updateMapMarkers();
                 });
         });
 
-        function editRoute(){
-            window.scrollTo({top:0,behavior:'smooth'});
-            document.getElementById('results').style.display='none';
+        let endGeocodeTimer = null;
+
+        function geocodeEndAddress() {
+            const endInp = document.getElementById('end_addr');
+            if (!endInp) return;
+            const q = (endInp.value || '').trim();
+            if (!q) return;
+
+            fetch('/geocode?query=' + encodeURIComponent(q))
+                .then(r => r.json())
+                .then(res => {
+                    if (!res || res.lat === null || res.lng === null) return;
+
+                    endLocationCoords = { lat: res.lat, lng: res.lng };
+                    const latField = document.getElementById('end_lat');
+                    const lngField = document.getElementById('end_lng');
+                    if (latField) latField.value = res.lat;
+                    if (lngField) lngField.value = res.lng;
+
+                    if (!endLocationMarker) {
+                        endLocationMarker = L.marker([res.lat, res.lng], {
+                            draggable: true,
+                            icon: createColoredIcon('#F44336', 'end')
+                        }).addTo(map);
+                        endLocationMarker.bindTooltip('Конец: ' + q).openTooltip();
+                        markers.push(endLocationMarker);
+
+                        endLocationMarker.on('dragend', function (e) {
+                            const p = e.target.getLatLng();
+                            endLocationCoords = { lat: p.lat, lng: p.lng };
+                            const latF = document.getElementById('end_lat');
+                            const lngF = document.getElementById('end_lng');
+                            if (latF) latF.value = p.lat;
+                            if (lngF) lngF.value = p.lng;
+                            fetch('/reverse_geocode?lat=' + p.lat + '&lng=' + p.lng)
+                                .then(r => r.json())
+                                .then(rr => {
+                                    endInp.value = rr.address || '';
+                                    endLocationMarker.setTooltipContent('Конец: ' + (rr.address || endInp.value));
+                                });
+                        });
+                    } else {
+                        endLocationMarker.setLatLng([res.lat, res.lng]);
+                        endLocationMarker.setTooltipContent('Конец: ' + q);
+                        if (!map.hasLayer(endLocationMarker)) endLocationMarker.addTo(map);
+                    }
+
+                    map.setView([res.lat, res.lng], Math.max(map.getZoom(), 14));
+                })
+                .catch(() => { });
+        }
+
+        const endInpEl = document.getElementById('end_addr');
+        if (endInpEl) {
+            endInpEl.addEventListener('input', function () {
+                clearTimeout(endGeocodeTimer);
+                endGeocodeTimer = setTimeout(geocodeEndAddress, 600);
+            });
+            endInpEl.addEventListener('change', function () {
+                clearTimeout(endGeocodeTimer);
+                endGeocodeTimer = setTimeout(geocodeEndAddress, 10);
+            });
+        }
+
+        let routingControl = null;
+
+        function drawRouteIfPossible() {
+            const sLat = parseFloat(document.getElementById('start_lat')?.value || '');
+            const sLng = parseFloat(document.getElementById('start_lng')?.value || '');
+            const eLat = parseFloat(document.getElementById('end_lat')?.value || '');
+            const eLng = parseFloat(document.getElementById('end_lng')?.value || '');
+            if (![sLat, sLng, eLat, eLng].every(n => Number.isFinite(n))) return;
+
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+
+            routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(sLat, sLng),
+                    L.latLng(eLat, eLng)
+                ],
+                router: L.Routing.osrmv1({
+                    serviceUrl: 'https://router.project-osrm.org/route/v1'
+                }),
+                lineOptions: {
+                    styles: [{ color: '#1e88e5', weight: 6, opacity: 0.8 }]
+                },
+                addWaypoints: false,
+                draggableWaypoints: false,
+                fitSelectedRoutes: true,
+                show: false,
+                createMarker: function () { return null; }
+            }).addTo(map);
+        }
+
+        // После загрузки страницы (то есть после POST) попробуем нарисовать маршрут
+        setTimeout(() => {
+            updateMapMarkers();
+            drawRouteIfPossible();
+        }, 800);
+
+        function editRoute() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('results').style.display = 'none';
         }
         // Sync budget slider & text
-        window.budget_slider&&budget_slider.addEventListener('input',()=>budgetValInp.value=budget_slider.value);
-        window.budgetValInp&&budgetValInp.addEventListener('input',()=>budget_slider.value=budgetValInp.value);
+        window.budget_slider && budget_slider.addEventListener('input', () => budgetValInp.value = budget_slider.value);
+        window.budgetValInp && budgetValInp.addEventListener('input', () => budget_slider.value = budgetValInp.value);
     </script>
 </body>
+
 </html>
