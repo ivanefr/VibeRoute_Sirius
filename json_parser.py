@@ -3,11 +3,6 @@ from shapely.geometry import mapping
 import pandas as pd
 
 def dump(obj, output_file="output.geojson"):
-    """
-    Универсальный dump:
-    - Если obj это GeoDataFrame, конвертирует geometry в geojson
-    - Если obj это dict/list, просто сохраняет
-    """
     if isinstance(obj, pd.DataFrame) and "geometry" in obj.columns:
         features = []
         for _, row in obj.iterrows():
@@ -25,8 +20,6 @@ def dump(obj, output_file="output.geojson"):
             json.dump(geojson, f, ensure_ascii=False, indent=2)
 
         print(f"Сохранено объектов: {len(features)}")
-    else:
-        # просто dict / list
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(obj, f, ensure_ascii=False, indent=2)
         print(f"Сохранено объектов (dict/list): {len(obj) if hasattr(obj, '__len__') else 1}")
