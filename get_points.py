@@ -28,7 +28,7 @@ def is_proj_in_segment(a, b, p):
     d2 = dot_product(x3 - x2, y3 - y2, x1 - x2, y1 - y2)
     return d1 >= 0 and d2 >= 0
 
-def get_points_into_route(objects_list, p_start, p_end, max_points=5, max_distance=1000):
+def get_points_into_route(objects_list, p_start, p_end, max_points=40, max_distance=2):
     work_objects = []
     for obj in objects_list:
         work_objects.append(Object(obj.x, obj.y, obj.desc, obj.other))
@@ -82,4 +82,5 @@ result = get_points_into_route(coordinates_list, p_start, p_end)
 
 print("Точки, попадающие в маршрут:")
 for obj in result:
+
     print(f"Долгота: {obj.x:.6f}, Широта: {obj.y:.6f}")
