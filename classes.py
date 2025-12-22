@@ -1,10 +1,9 @@
 import get_embedding
 
 class Object:
-    def __init__(self, x, y, dist_to_vec, desc, other_params):
+    def __init__(self, x, y, desc, other_params):
         self.x = x
         self.y = y
-        self.dist_to_vec = dist_to_vec
         self.desc = desc
         self.other = other_params
 
@@ -27,3 +26,4 @@ class EmbSearch:
             res.append(self.db[i])
 
         return res
+
