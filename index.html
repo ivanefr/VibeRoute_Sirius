@@ -448,32 +448,36 @@
             const startInp = document.getElementById('start_addr');
             const endInp = document.getElementById('end_addr');
 
-            // Стартовая точка (зелёный цвет) - только если нет маркера текущего местоположения
-            if (startInp && startInp.value && !currentLocationMarker) {
-                let lat, lon;
-                if (currentLocationCoords) {
-                    lat = currentLocationCoords.lat;
-                    lon = currentLocationCoords.lng;
-                } else {
-                    lat = 55.75 + Math.random() * 0.06 - 0.03;
-                    lon = 37.61 + Math.random() * 0.09 - 0.045;
+            // Стартовая точка (зелёный цвет)
+            if (startInp && startInp.value) {
+                // Если координат ещё нет — ждём geocodeStartAddress() из обработчиков input/change
+                if (currentLocationCoords && !currentLocationMarker) {
+                    const startMarker = L.marker([currentLocationCoords.lat, currentLocationCoords.lng], {
+                        draggable: true,
+                        icon: createColoredIcon('#4CAF50', 'start')
+                    }).addTo(map);
+
+                    startMarker.bindTooltip('Старт: ' + startInp.value).openTooltip();
+
+                    startMarker.on('dragend', function (e) {
+                        const p = e.target.getLatLng();
+                        updateAddressFromCoords(p.lat, p.lng, startMarker);
+                        const latF = document.getElementById('start_lat');
+                        const lngF = document.getElementById('start_lng');
+                        if (latF) latF.value = p.lat;
+                        if (lngF) lngF.value = p.lng;
+                    });
+
+                    markers.push(startMarker);
+                    currentLocationMarker = startMarker;
                 }
-                const startMarker = L.marker([lat, lon], {
-                    draggable: true,
-                    icon: createColoredIcon('#4CAF50', 'start')
-                }).addTo(map);
 
-                startMarker.bindTooltip('Старт: ' + startInp.value).openTooltip();
-
-                // При перетаскивании обновляем адрес
-                startMarker.on('dragend', function (e) {
-                    const newLat = e.target.getLatLng().lat;
-                    const newLng = e.target.getLatLng().lng;
-                    updateAddressFromCoords(newLat, newLng, null);
-                });
-
-                markers.push(startMarker);
-                currentLocationMarker = startMarker;
+                if (currentLocationMarker) {
+                    currentLocationMarker.setTooltipContent('Старт: ' + startInp.value);
+                    if (currentLocationCoords) {
+                        currentLocationMarker.setLatLng([currentLocationCoords.lat, currentLocationCoords.lng]);
+                    }
+                }
             }
 
             // Конечная точка (красный цвет)
@@ -535,6 +539,64 @@
                     updateMapMarkers();
                 });
         });
+
+        let startGeocodeTimer = null;
+
+        function geocodeStartAddress() {
+            const startInp = document.getElementById('start_addr');
+            if (!startInp) return;
+            const q = (startInp.value || '').trim();
+            if (!q) return;
+
+            fetch('/geocode?query=' + encodeURIComponent(q))
+                .then(r => r.json())
+                .then(res => {
+                    if (!res || res.lat === null || res.lng === null) return;
+
+                    currentLocationCoords = { lat: res.lat, lng: res.lng };
+                    const latField = document.getElementById('start_lat');
+                    const lngField = document.getElementById('start_lng');
+                    if (latField) latField.value = res.lat;
+                    if (lngField) lngField.value = res.lng;
+
+                    if (!currentLocationMarker) {
+                        currentLocationMarker = L.marker([res.lat, res.lng], {
+                            draggable: true,
+                            icon: createColoredIcon('#4CAF50', 'start')
+                        }).addTo(map);
+                        currentLocationMarker.bindTooltip('Старт: ' + q).openTooltip();
+                        markers.push(currentLocationMarker);
+
+                        currentLocationMarker.on('dragend', function (e) {
+                            const p = e.target.getLatLng();
+                            updateAddressFromCoords(p.lat, p.lng, currentLocationMarker);
+                            const latF = document.getElementById('start_lat');
+                            const lngF = document.getElementById('start_lng');
+                            if (latF) latF.value = p.lat;
+                            if (lngF) lngF.value = p.lng;
+                        });
+                    } else {
+                        currentLocationMarker.setLatLng([res.lat, res.lng]);
+                        currentLocationMarker.setTooltipContent('Старт: ' + q);
+                        if (!map.hasLayer(currentLocationMarker)) currentLocationMarker.addTo(map);
+                    }
+
+                    map.setView([res.lat, res.lng], Math.max(map.getZoom(), 14));
+                })
+                .catch(() => { });
+        }
+
+        const startInpEl = document.getElementById('start_addr');
+        if (startInpEl) {
+            startInpEl.addEventListener('input', function () {
+                clearTimeout(startGeocodeTimer);
+                startGeocodeTimer = setTimeout(geocodeStartAddress, 600);
+            });
+            startInpEl.addEventListener('change', function () {
+                clearTimeout(startGeocodeTimer);
+                startGeocodeTimer = setTimeout(geocodeStartAddress, 10);
+            });
+        }
 
         let endGeocodeTimer = null;
 

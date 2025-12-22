@@ -208,3 +208,5 @@ __marimo__/
 test.py
 test2.py
 test22.py
+__pycache__/
+__pycache__

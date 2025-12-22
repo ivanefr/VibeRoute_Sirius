@@ -137,7 +137,7 @@ def forward_geocode(query):
                 "geocode": query,
                 "results": 1
             },
-            timeout=5
+            timeout=3
         )
         yandex_resp.raise_for_status()
         yandex_data = yandex_resp.json()
@@ -356,7 +356,7 @@ def reverse_geocode():
                 "kind": "house",  # Запрашиваем адрес дома
                 "results": 1
             },
-            timeout=5
+            timeout=3
         )
         yandex_resp.raise_for_status()
         yandex_data = yandex_resp.json()
