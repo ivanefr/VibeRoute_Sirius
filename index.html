@@ -129,32 +129,8 @@
                 <span class="metric-label">Бюджет</span>
                 <span class="metric-val">{{ result_data.budget }} ₽</span>
             </div>
-            <div class="metric">
-                <span class="metric-label">Дистанция</span>
-                <span class="metric-val">{{ result_data.distance }} км</span>
-            </div>
         </div>
         <h3 style="margin:26px 0 9px 0;">Пошаговый план маршрута</h3>
-        <ul class="step-list">
-            {% for step in result_data.steps %}
-            <li class="step-item">
-                <div><b>{{ loop.index }}. {{ step.name }}</b></div>
-                <div style="margin:7px 0 7px 0;">{{ step.desc }}</div>
-                <div style="margin:7px 0 7px 0;color:#534">
-                    <b>Бюджет:</b> {{ step.budget }}
-                </div>
-                <img src="{{step.img}}" alt="img места" loading="lazy" />
-                <br>
-                <a href="{{step.map_link}}" target="_blank" class="step-geolink">Посмотреть на карте</a>
-                {% if step.segment %}
-                <div class="segment-info">{{step.segment}}</div>
-                {% endif %}
-            </li>
-            {% endfor %}
-        </ul>
-        <div class="tips-block">
-            {{ result_data.tips|safe }}
-        </div>
     </div>
     {% endif %}
     <script id="places-data" type="application/json">{{ places|tojson }}</script>
