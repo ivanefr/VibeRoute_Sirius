@@ -95,32 +95,6 @@ body {
     margin-bottom: 12px;
 }
 
-.waypoint-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-    gap: 6px;
-}
-
-.waypoint-row input {
-    flex: 1;
-}
-
-.waypoint-btn {
-    background: none;
-    border: none;
-    font-size: 1.25rem;
-    cursor: pointer;
-}
-
-.waypoint-btn.remove {
-    color: #fd4e4e;
-}
-
-.waypoint-btn.up {
-    color: #5797f8;
-}
-
 .btn-main {
     background: #fd4e4e;
     border: none;

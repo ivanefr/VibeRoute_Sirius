@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
 </head>
 
-<body>
+<body data-generated="{{ 1 if generated else 0 }}">
     <div class="header">
         <div class="logo">
             <img src="https://raw.githubusercontent.com/streamlit/brand/main/logos/streamlit-logo-primary-colormark-darktext.png"
@@ -38,43 +38,27 @@
                                 style="border:none;background:none;cursor:pointer;font-size:1.35rem;">📍</button>
                         </div>
                         <!-- Скрытые поля для координат начального местоположения -->
-                        <input type="hidden" id="start_lat" name="start_lat" value="{{ formdata.start_lat|default('') }}">
-                        <input type="hidden" id="start_lng" name="start_lng" value="{{ formdata.start_lng|default('') }}">
+                        <input type="hidden" id="start_lat" name="start_lat" value="{{ formdata.start_lat|default('')}}">
+                        <input type="hidden" id="start_lng" name="start_lng" value="{{ formdata.start_lng|default('')}}">
 
                         <!-- Скрытые поля для сохранения состояния карты -->
-                        <input type="hidden" id="map_lat" name="map_lat" value="{{ formdata.map_lat|default('') }}">
-                        <input type="hidden" id="map_lng" name="map_lng" value="{{ formdata.map_lng|default('') }}">
-                        <input type="hidden" id="map_zoom" name="map_zoom" value="{{ formdata.map_zoom|default('') }}">
+                        <input type="hidden" id="map_lat" name="map_lat" value="{{ formdata.map_lat|default('')}}">
+                        <input type="hidden" id="map_lng" name="map_lng" value="{{ formdata.map_lng|default('')}}">
+                        <input type="hidden" id="map_zoom" name="map_zoom" value="{{ formdata.map_zoom|default('')}}">
 
-                        <!-- <label>Куда хочешь зайти? <span style="font-weight:normal;">(промежуточные точки)</span></label> -->
-                        <div id="waypoints_fields">
-                            {% for pt in formdata.waypoints %}
-                            <div class="waypoint-row" draggable="true" data-idx="{{ loop.index0 }}">
-                                <input type="text" name="waypoints" value="{{ pt }}" placeholder="Добавьте место...">
-                                <button class="waypoint-btn up" type="button"
-                                    onclick="moveWaypointUp({{ loop.index0 }})" title="Вверх" {% if loop.first
-                                    %}disabled{% endif %}>⬆️</button>
-                                <button class="waypoint-btn remove" type="button"
-                                    onclick="removeWaypoint({{ loop.index0 }})">✖</button>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <!-- <button type="button" class="add-wp-btn" onclick="addWaypoint()">+ Добавить место</button> -->
                         <label for="end_addr" style="margin-top:16px;">Куда хочешь прийти?</label>
                         <div style="display:flex;gap:10px;margin-bottom:6px;">
                             <input type="text" id="end_addr" name="end_addr" placeholder="Введите адрес..."
-                                style="flex:1;" value="{{ formdata.end_addr|default('') }}">
+                                style="flex:1;" value="{{ formdata.end_addr|default('')}}">
+
                             <button type="button" onclick="geoLocateEnd()" title="Указать конечную точку по геопозиции"
                                 style="border:none;background:none;cursor:pointer;font-size:1.35rem;">
                                 📍
                             </button>
                         </div>
-                        <input type="hidden" id="end_lat" name="end_lat" value="{{ formdata.end_lat|default('') }}">
-                        <input type="hidden" id="end_lng" name="end_lng" value="{{ formdata.end_lng|default('') }}">
-                        <!-- <label for="end_addr" style="margin-top:16px;">Куда хочешь прийти?</label>
-                    <button type="button" onclick="geoLocateStart()" title="Использовать геопозицию" style="border:none;background:none;cursor:pointer;font-size:1.35rem;">📍</button>
+                        <input type="hidden" id="end_lat" name="end_lat" value="{{ formdata.end_lat|default('')}}">
+                        <input type="hidden" id="end_lng" name="end_lng" value="{{ formdata.end_lng|default('')}}">
 
-                    <input type="text" id="end_addr" name="end_addr" placeholder="Введите адрес..." value="{{ formdata.end_addr|default('') }}"> -->
                     </div>
                     <div class="param-block walk-details">
                         <label>Длительность прогулки</label>
@@ -186,6 +170,7 @@
         </div>
     </div>
     {% endif %}
+    <script id="places-data" type="application/json">{{ places|tojson }}</script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
     <script>
@@ -204,54 +189,13 @@
 
         // Инициализация при загрузке страницы
         updateDurationLabel(durationSlider.value);
-        let waypoints = {{ formdata.waypoints| tojson }};
         function setBudget(v) { budget_slider.value = budgetValInp.value = v; }
         function selectVibe(val) {
             document.getElementById('vibe').value = val;
             document.querySelectorAll('.char-vibe-card').forEach(
                 c => { c.classList.remove('selected'); if (c.getAttribute('data-vibe') === val) c.classList.add('selected'); });
         }
-        // ------- Waypoints controls ------
-        function syncWaypointsFromInputs() {
-            let inputs = document.querySelectorAll('input[name="waypoints"]');
-            waypoints = [];
-            inputs.forEach(i => waypoints.push(i.value));
-        }
-        function addWaypoint() {
-            syncWaypointsFromInputs();
-            waypoints.push('');
-            renderWaypoints();
-        }
-        function removeWaypoint(idx) {
-            syncWaypointsFromInputs();
-            waypoints.splice(idx, 1);
-            renderWaypoints();
-        }
-        function moveWaypointUp(idx) {
-            syncWaypointsFromInputs();
-            if (idx > 0) { let tmp = waypoints[idx - 1]; waypoints[idx - 1] = waypoints[idx]; waypoints[idx] = tmp; }
-            renderWaypoints();
-        }
-        function renderWaypoints() {
-            let wrap = document.getElementById('waypoints_fields');
-            wrap.innerHTML = '';
-            for (let i = 0; i < waypoints.length; i++) {
-                wrap.insertAdjacentHTML('beforeend',
-                    `<div class="waypoint-row" draggable="true" data-idx="${i}">
-                        <input type="text" name="waypoints" value="${waypoints[i]}" placeholder="Добавьте место...">
-                        <button class="waypoint-btn up" type="button" onclick="moveWaypointUp(${i})" ${i == 0 ? "disabled" : ""}>⬆️</button>
-                        <button class="waypoint-btn remove" type="button" onclick="removeWaypoint(${i})">✖</button>
-                    </div>`
-                );
-            }
-        }
         document.getElementById('mainform').addEventListener('submit', function (e) {
-            let wps = [];
-            document.querySelectorAll('input[name="waypoints"]').forEach(i => wps.push(i.value));
-            let h = document.createElement('input'); h.type = "hidden"; h.name = "waypoints_json";
-            h.value = JSON.stringify(wps);
-            this.appendChild(h);
-
             // Сохраняем текущие центр и зум карты, чтобы после POST она не сбрасывалась на Москву
             if (map) {
                 const c = map.getCenter();
@@ -270,7 +214,8 @@
                 if (latField) latField.value = currentLocationCoords.lat;
                 if (lngField) lngField.value = currentLocationCoords.lng;
             }
-            // Заполняем скрытые поля координат КОНЕЧНОЙ точки
+
+            // Заполняем скрытые поля координатами КОНЕЧНОЙ точки
             if (endLocationCoords) {
                 const latField = document.getElementById('end_lat');
                 const lngField = document.getElementById('end_lng');
@@ -279,7 +224,6 @@
             }
 
         });
-        if (typeof waypoints === 'object') renderWaypoints();
 
         // --- Interactive Map with Leaflet ---
         const mapLatField = document.getElementById('map_lat');
@@ -294,6 +238,17 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
         }).addTo(map);
+
+        const IS_GENERATED = (document.body && document.body.dataset && document.body.dataset.generated === '1');
+        let PLACES = [];
+        try {
+            const placesEl = document.getElementById('places-data');
+            if (placesEl && placesEl.textContent) {
+                PLACES = JSON.parse(placesEl.textContent);
+            }
+        } catch (e) {
+            PLACES = [];
+        }
 
         let markers = [];
         let currentLocationCoords = null; // Сохраняем координаты текущего местоположения
@@ -349,6 +304,40 @@
                 iconSize: [25, 25],
                 iconAnchor: [12, 25],
                 popupAnchor: [0, -25]
+            });
+        }
+
+        let placeMarkers = [];
+
+        function clearPlaceMarkers() {
+            placeMarkers.forEach(m => {
+                try { map.removeLayer(m); } catch { }
+            });
+            placeMarkers = [];
+        }
+
+        function addPlaceMarkersIfGenerated() {
+            if (!IS_GENERATED) return;
+            if (!Array.isArray(PLACES) || PLACES.length === 0) return;
+
+            clearPlaceMarkers();
+
+            PLACES.forEach((feat) => {
+                const coords = feat?.geometry?.coordinates;
+                if (!Array.isArray(coords) || coords.length < 2) return;
+                const lng = parseFloat(coords[0]);
+                const lat = parseFloat(coords[1]);
+                if (![lat, lng].every(n => Number.isFinite(n))) return;
+
+                const props = feat?.properties || {};
+                const name = (props.name || props['name:ru'] || props['name:en'] || 'Место');
+                const amenity = (props.amenity || '');
+
+                const m = L.marker([lat, lng], {
+                    icon: createColoredIcon('#5797f8', 'place')
+                }).addTo(map);
+                m.bindPopup(`<b>${String(name)}</b>${amenity ? `<br><span style="color:#666">${String(amenity)}</span>` : ''}`);
+                placeMarkers.push(m);
             });
         }
 
@@ -480,7 +469,6 @@
         window.geoLocateStart = geoLocateStart;
         window.geoLocateEnd = geoLocateEnd;
 
-
         function updateMapMarkers() {
             // Удаляем все маркеры, кроме маркера текущего местоположения и маркера конечной точки
             markers.forEach(m => {
@@ -496,7 +484,6 @@
             // Создаём маркеры для всех точек
             const startInp = document.getElementById('start_addr');
             const endInp = document.getElementById('end_addr');
-            const waypointInputs = document.querySelectorAll('input[name="waypoints"]');
 
             // Стартовая точка (зелёный цвет) - только если нет маркера текущего местоположения
             if (startInp && startInp.value && !currentLocationMarker) {
@@ -512,6 +499,7 @@
                     draggable: true,
                     icon: createColoredIcon('#4CAF50', 'start')
                 }).addTo(map);
+
                 startMarker.bindTooltip('Старт: ' + startInp.value).openTooltip();
 
                 // При перетаскивании обновляем адрес
@@ -524,37 +512,6 @@
                 markers.push(startMarker);
                 currentLocationMarker = startMarker;
             }
-
-            // Промежуточные точки (синий цвет)
-            waypointInputs.forEach((input, idx) => {
-                if (input.value) {
-                    const lat = 55.75 + Math.random() * 0.06 - 0.03;
-                    const lon = 37.61 + Math.random() * 0.09 - 0.045;
-
-                    const waypointMarker = L.marker([lat, lon], {
-                        draggable: true,
-                        icon: createColoredIcon('#2196F3', 'waypoint')
-                    }).addTo(map);
-                    waypointMarker.bindTooltip('Промежуточная точка: ' + input.value).openTooltip();
-
-                    // При перетаскивании обновляем адрес в соответствующем поле
-                    waypointMarker.on('dragend', function (e) {
-                        const newLat = e.target.getLatLng().lat;
-                        const newLng = e.target.getLatLng().lng;
-                        fetch('/reverse_geocode?lat=' + newLat + '&lng=' + newLng)
-                            .then(r => r.json())
-                            .then(res => {
-                                input.value = res.address || '';
-                                waypointMarker.setTooltipContent('Промежуточная точка: ' + (res.address || input.value));
-                            })
-                            .catch(() => {
-                                input.value = `${newLat}, ${newLng}`;
-                            });
-                    });
-
-                    markers.push(waypointMarker);
-                }
-            });
 
             // Конечная точка (красный цвет)
             if (endInp && endInp.value) {
@@ -576,17 +533,16 @@
 
                     // При перетаскивании обновляем адрес
                     endMarker.on('dragend', function (e) {
-                        const newLat = e.target.getLatLng().lat;
-                        const newLng = e.target.getLatLng().lng;
-                        endLocationCoords = { lat: newLat, lng: newLng };
-                        fetch('/reverse_geocode?lat=' + newLat + '&lng=' + newLng)
+                        const p = e.target.getLatLng();
+
+                        endLocationCoords = { lat: p.lat, lng: p.lng };
+
+                        fetch('/reverse_geocode?lat=' + p.lat + '&lng=' + p.lng)
                             .then(r => r.json())
                             .then(res => {
-                                endInp.value = res.address || '';
-                                endMarker.setTooltipContent('Конец: ' + (res.address || endInp.value));
-                            })
-                            .catch(() => {
-                                endInp.value = `${newLat}, ${newLng}`;
+                                const inp = document.getElementById('end_addr');
+                                if (inp) inp.value = res.address || '';
+                                endMarker.setTooltipContent('Конец: ' + (res.address || ''));
                             });
                     });
 
@@ -608,18 +564,11 @@
         setTimeout(updateMapMarkers, 600);
 
         map.on('click', function (e) {
-            // For demo: On map click, fill next empty waypoint or end
             let lat = e.latlng.lat, lng = e.latlng.lng;
             fetch('/reverse_geocode?lat=' + lat + '&lng=' + lng).then(
                 r => r.json()).then(res => {
-
-                    let wps = document.querySelectorAll('input[name="waypoints"]');
-                    let filled = false;
-                    for (let i = 0; i < wps.length; i++) { if (!wps[i].value) { wps[i].value = res.address; filled = true; break; } }
-                    if (!filled) {
-                        let end = document.getElementById('end_addr');
-                        if (end && !end.value) end.value = res.address;
-                    }
+                    let end = document.getElementById('end_addr');
+                    if (end && !end.value) end.value = res.address;
                     updateMapMarkers();
                 });
         });
@@ -653,16 +602,15 @@
 
                         endLocationMarker.on('dragend', function (e) {
                             const p = e.target.getLatLng();
+
                             endLocationCoords = { lat: p.lat, lng: p.lng };
-                            const latF = document.getElementById('end_lat');
-                            const lngF = document.getElementById('end_lng');
-                            if (latF) latF.value = p.lat;
-                            if (lngF) lngF.value = p.lng;
+
                             fetch('/reverse_geocode?lat=' + p.lat + '&lng=' + p.lng)
                                 .then(r => r.json())
-                                .then(rr => {
-                                    endInp.value = rr.address || '';
-                                    endLocationMarker.setTooltipContent('Конец: ' + (rr.address || endInp.value));
+                                .then(res => {
+                                    const inp = document.getElementById('end_addr');
+                                    if (inp) inp.value = res.address || '';
+                                    endLocationMarker.setTooltipContent('Конец: ' + (res.address || ''));
                                 });
                         });
                     } else {
@@ -725,6 +673,7 @@
         setTimeout(() => {
             updateMapMarkers();
             drawRouteIfPossible();
+            addPlaceMarkersIfGenerated();
         }, 800);
 
         function editRoute() {

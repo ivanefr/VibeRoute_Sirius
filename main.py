@@ -20,7 +20,56 @@ VIBES = [
     ("gourmet", "🍕", "Гурманская"),
 ]
 
-PLACE_DEMOS = []
+PLACES = [{
+      "type": "Feature",
+      "properties": {
+        "amenity": "cafe",
+        "name": "Шоколадница",
+        "name:en": "Shokoladnitsa",
+        "phone": "+7 862 2383923",
+        "website": "https://shoko.ru/",
+        "cuisine": "coffee_shop",
+        "opening_hours": "Mo-Su 10:00-22:00",
+        "name:ru": "Шоколадница",
+        "level": "0",
+        "popularity_score": 8
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          39.9262057,
+          43.4272589
+        ]
+      }
+    },{
+      "type": "Feature",
+      "properties": {
+        "amenity": "pub",
+        "name": "O'Sullivan's Irish Pub",
+        "phone": "+7 938 4550074",
+        "website": "http://osullivans.ru/",
+        "addr:city": "Сочи",
+        "addr:housenumber": "55",
+        "addr:street": "улица 65 лет Победы",
+        "cuisine": "irish",
+        "opening_hours": "Mo-Su 12:00-24:00",
+        "internet_access": "wlan",
+        "alt_name": "Ирландский паб",
+        "mapillary": "841823033145973",
+        "survey:date": "2017-09-11",
+        "theme": "irish",
+        "popularity_score": 8
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          39.9755125,
+          43.3964213
+        ]
+      }
+    },
+]
+
 
 # ====== Загрузка реальных мест из JSON-файла ======
 # Ожидаемый формат файла places.json (в корне проекта):
@@ -35,12 +84,12 @@ PLACE_DEMOS = []
 #   },
 #   ...
 # ]
-PLACES = []
-try:
-    with open("places.json", "r", encoding="utf-8") as f:
-        PLACES = json.load(f)
-except FileNotFoundError:
-    PLACES = []
+# PLACES = []
+# try:
+#     with open("places.json", "r", encoding="utf-8") as f:
+#         PLACES = json.load(f)
+# except FileNotFoundError:
+#     PLACES = []
 
 # Получает данные из формы
 
@@ -61,19 +110,6 @@ def parse_form(req_form):
     fd["map_lat"] = req_form.get("map_lat", "")
     fd["map_lng"] = req_form.get("map_lng", "")
     fd["map_zoom"] = req_form.get("map_zoom", "")
-    # Custom waypoints parser
-    waypoints = []
-    if "waypoints_json" in req_form:
-        import json
-        try:
-            waypoints = json.loads(req_form.get("waypoints_json"))
-        except:
-            waypoints = []
-    else:
-        waypoints = req_form.getlist("waypoints")
-    fd["waypoints"] = [w for w in waypoints if w and w.strip()]
-    # print(fd['start_addr'])
-    # print(fd['waypoints'])
     return fd
 
 
@@ -166,7 +202,6 @@ def demo_route_steps(formdata):
     points = []
     if formdata.get("start_addr"):
         points.append(formdata["start_addr"])
-    points.extend(formdata.get("waypoints", []))
     if formdata.get("end_addr"):
         points.append(formdata["end_addr"])
     N = len(points)
@@ -225,8 +260,7 @@ def get_vibe_verbose(vibe):
 
 
 def demo_tips(formdata):
-    rest = max(formdata['budget'] - 700 *
-               (2+len(formdata.get("waypoints", []))), 0)
+    rest = max(formdata['budget'] - 700 * 2, 0)
     return (
         f"Остаток бюджета <span style='font-weight:bold'>{rest} ₽</span> можно потратить на десерт в кофейне у конечной точки или на покупку сувениров."
         "<br>Дополнительно: Возьмите power bank, чтобы не пропустить красивые фото!<br>"
@@ -238,7 +272,7 @@ def demo_tips(formdata):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     loading = False
-    formdata = {"waypoints": []}
+    formdata = {}
     result_data = None
     generated = False
     if request.method == 'POST':
@@ -292,17 +326,14 @@ def index():
         for k in ["start_addr", "end_addr", "duration_hrs", "duration_mins", "budget", "vibe", "extra_notes", "map_lat", "map_lng", "map_zoom"]:
             if k in request.args:
                 formdata[k] = request.args[k]
-        wps = request.args.getlist('waypoints')
-        if wps:
-            formdata["waypoints"] = wps
-        else:
-            formdata["waypoints"] = []
-    print(formdata)
-    print(result_data)
+    if result_data is not None:
+        print(f"{formdata=}")
+        print(f"{result_data=}")
     # Читаем шаблон в UTF-8, чтобы не падать на эмодзи/спецсимволах в Windows-консоли
+    # Вот здесь появится функция которая получает массив PLACE
     with open('index.html', 'r', encoding='utf-8') as file:
         BASE_HTML = file.read()
-    return render_template_string(BASE_HTML, formdata=formdata, vibes=VIBES, result_data=result_data, generated=generated, loading=loading)
+    return render_template_string(BASE_HTML, formdata=formdata, vibes=VIBES, result_data=result_data, generated=generated, loading=loading, places=PLACES)
 
 
 @app.route('/reverse_geocode')
