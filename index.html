@@ -136,6 +136,8 @@
     <script id="places-data" type="application/json">{{ places|tojson }}</script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine-openrouteservice/dist/leaflet-routing-openrouteservice.min.js"></script>
+
     <script>
         const durationSlider = document.getElementById('duration_slider');
         const durationLabel = document.getElementById('durationLabel');
@@ -697,7 +699,9 @@
         // После загрузки страницы (то есть после POST) попробуем нарисовать маршрут
         setTimeout(() => {
             updateMapMarkers();
-            drawRouteIfPossible();
+            if (IS_GENERATED) {
+                drawRouteIfPossible();
+            }
             addPlaceMarkersIfGenerated();
         }, 800);
 

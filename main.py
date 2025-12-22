@@ -25,14 +25,6 @@ PLACES = [{
       "properties": {
         "amenity": "cafe",
         "name": "Шоколадница",
-        "name:en": "Shokoladnitsa",
-        "phone": "+7 862 2383923",
-        "website": "https://shoko.ru/",
-        "cuisine": "coffee_shop",
-        "opening_hours": "Mo-Su 10:00-22:00",
-        "name:ru": "Шоколадница",
-        "level": "0",
-        "popularity_score": 8
       },
       "geometry": {
         "type": "Point",
@@ -46,19 +38,6 @@ PLACES = [{
       "properties": {
         "amenity": "pub",
         "name": "O'Sullivan's Irish Pub",
-        "phone": "+7 938 4550074",
-        "website": "http://osullivans.ru/",
-        "addr:city": "Сочи",
-        "addr:housenumber": "55",
-        "addr:street": "улица 65 лет Победы",
-        "cuisine": "irish",
-        "opening_hours": "Mo-Su 12:00-24:00",
-        "internet_access": "wlan",
-        "alt_name": "Ирландский паб",
-        "mapillary": "841823033145973",
-        "survey:date": "2017-09-11",
-        "theme": "irish",
-        "popularity_score": 8
       },
       "geometry": {
         "type": "Point",
@@ -69,30 +48,13 @@ PLACES = [{
       }
     },
 ]
-
-
-# ====== Загрузка реальных мест из JSON-файла ======
-# Ожидаемый формат файла places.json (в корне проекта):
-# [
-#   {
-#     "name": "Парк Горького",
-#     "lat": 55.729876,
-#     "lng": 37.603456,
-#     "desc": "Большой парк с набережной и прокатом.",
-#     "budget": "Вход свободный, кофе ~300 ₽",
-#     "img": "https://example.com/gorky.png"
-#   },
-#   ...
-# ]
-# PLACES = []
-# try:
-#     with open("places.json", "r", encoding="utf-8") as f:
-#         PLACES = json.load(f)
-# except FileNotFoundError:
-#     PLACES = []
-
-# Получает данные из формы
-
+def get_places(fd, rd):
+    global PLACES
+    dic = []
+    with open('sirius_poi_all_info_clear_desc.geojson', "r", encoding="utf-8") as f:
+        dic = json.load(f)
+    PLACES = random.choices(dic['features'], k=10)
+    return PLACES
 
 def parse_form(req_form):
     fd = {}
@@ -271,6 +233,7 @@ def demo_tips(formdata):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    global PLACES
     loading = False
     formdata = {}
     result_data = None
@@ -298,15 +261,11 @@ def index():
 
         if end_coords:
             print(f"END: {end_coords['lat']}, {end_coords['lng']}")
+        # PLACES = get_places(start_coords['lat'], start_coords['lng'], end_coords['lat'], end_coords['lng'])
         # print(request.args)
         # print(request)
         # Получаем координаты начального местоположения (если были переданы)
         start_coords = get_start_location_coords(request.form)
-        if start_coords:
-            pass
-            # print(
-            #     f"Координаты начального местоположения: lat={start_coords['lat']}, lng={start_coords['lng']}")
-            # Здесь можно использовать координаты для построения маршрута, поиска ближайших мест и т.д.
 
         # Demo: use dummy route info/LLM generated results
         steps = demo_route_steps(formdata)
@@ -326,7 +285,19 @@ def index():
         for k in ["start_addr", "end_addr", "duration_hrs", "duration_mins", "budget", "vibe", "extra_notes", "map_lat", "map_lng", "map_zoom"]:
             if k in request.args:
                 formdata[k] = request.args[k]
+        if not request.args:
+            formdata.setdefault("start_addr", "Сириус Арена, Сириус")
+            formdata.setdefault("end_addr", "Сочи Парк, Сириус")
+            formdata.setdefault("start_lat", "43.40881998152516")
+            formdata.setdefault("start_lng", "39.952640447932154")
+            formdata.setdefault("end_lat", "43.4047")
+            formdata.setdefault("end_lng", "39.9670")
+            formdata.setdefault("map_lat", "43.4085")
+            formdata.setdefault("map_lng", "39.9625")
+            formdata.setdefault("map_zoom", "14")
     if result_data is not None:
+        PLACES = get_places(formdata, result_data)
+        
         print(f"{formdata=}")
         print(f"{result_data=}")
     # Читаем шаблон в UTF-8, чтобы не падать на эмодзи/спецсимволах в Windows-консоли
