@@ -13,8 +13,6 @@
 <body data-generated="{{ 1 if generated else 0 }}">
     <div class="header">
         <div class="logo">
-            <img src="https://raw.githubusercontent.com/streamlit/brand/main/logos/streamlit-logo-primary-colormark-darktext.png"
-                alt="logo">
             VibeRoute
         </div>
         <div class="desc">Твой идеальный маршрут, созданный AI</div>
@@ -22,7 +20,6 @@
             <button
                 onclick="alert('VibeRoute — сервис планирования прогулок и маршрутов по настроению, бюджету и времени. Powered by AI.')">О
                 проекте</button>
-            <button onclick="window.location='mailto:hello@viberoute.ai'">Контакты</button>
         </div>
     </div>
     <form id="mainform" method="post" style="margin:0;padding:0;">
@@ -157,16 +154,6 @@
         </ul>
         <div class="tips-block">
             {{ result_data.tips|safe }}
-        </div>
-        <div class="actions">
-            <button onclick="alert('Сохранить можно будет после входа!')" class="btn-main"
-                style="background:#a8d18a">Сохранить маршрут</button>
-            <button
-                onclick="navigator.clipboard.writeText(window.location.href);alert('Ссылка на маршрут скопирована!');"
-                class="btn-main" style="background:#4faaf5">Поделиться</button>
-            <button onclick="editRoute()" class="btn-main" style="background:#ffe07a;color:#543">Изменить
-                маршрут</button>
-            <button onclick="window.location='/'" class="btn-main" style="background:#efb0b6">Новый маршрут</button>
         </div>
     </div>
     {% endif %}

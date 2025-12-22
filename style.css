@@ -122,11 +122,12 @@ body {
 }
 
 .char-vibe-card {
-    flex: 1 0 38%;
-    min-width: 100px;
-    max-width: 156px;
+    flex: 0 0 calc(50% - 10px);
+    width: calc(50% - 10px);
+    min-width: 156px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     background: #fafafb;
     border: 1.5px solid #eee;
@@ -134,6 +135,9 @@ body {
     border-radius: 20px;
     cursor: pointer;
     transition: .16s;
+    box-sizing: border-box;
+    min-height: 44px;
+    text-align: center;
 }
 
 .char-vibe-card.selected {
