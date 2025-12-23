@@ -677,11 +677,23 @@
                 routingControl = null;
             }
 
+            let waypoints = [L.latLng(sLat, sLng)];
+
+            PLACES.forEach((place) => {
+                const coords = place?.geometry?.coordinates;
+                if (Array.isArray(coords) && coords.length >= 2) {
+                    const lng = parseFloat(coords[0]);
+                    const lat = parseFloat(coords[1]);
+                    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+                        waypoints.push(L.latLng(lat, lng));
+                    }
+                }
+            });
+
+            waypoints.push(L.latLng(eLat, eLng));
+
             routingControl = L.Routing.control({
-                waypoints: [
-                    L.latLng(sLat, sLng),
-                    L.latLng(eLat, eLng)
-                ],
+                waypoints: waypoints,
                 router: L.Routing.osrmv1({
                     serviceUrl: 'https://routing.openstreetmap.de/routed-foot/route/v1'
                 }),

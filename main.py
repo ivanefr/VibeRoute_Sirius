@@ -53,7 +53,7 @@ def get_places(fd, rd):
     dic = []
     with open('sirius_poi_all_info_clear_desc.geojson', "r", encoding="utf-8") as f:
         dic = json.load(f)
-    PLACES = random.choices(dic['features'], k=10)
+    PLACES = random.choices(dic['features'], k=3)
     return PLACES
 
 def parse_form(req_form):
