@@ -1,0 +1,41 @@
+import json
+import classes
+
+
+def get_database():
+    with open('sirius_poi_all_info_clear_desc.geojson', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    objects = []
+
+    cnt = 0
+
+    for i in data['features']:
+        # if cnt >= 50:
+        #     break
+        x = i['geometry']['coordinates'][0]
+        y = i['geometry']['coordinates'][1]
+        id = cnt
+        street = i['properties']['street']
+        desc = f'Название: {i['properties']['name']}. '
+
+        if 'amenity' in i['properties']:
+            desc += f'Тип: {i['properties']['amenity']}. '
+        if 'leisure' in i['properties']:
+            desc += f'Тип: {i['properties']['leisure']}. '
+        if 'popularity_score' in i['properties']:
+            desc += f'Уровень популярности: {i['properties']['popularity_score']}. '
+        if 'info' in i:
+            if 'rating' in i['info']:
+                desc += f'Оценка по пятибалльной шкале: {i['info']['rating']}. '
+            if 'description' in i['info'] and i['info']['description'] != None:
+                desc += f'Короткое описание: {i['info']['rating']}. '
+
+            if len(i['info']['feat_text']) >= 1:
+                desc += 'Прочая информация: '
+                for j in i['info']['feat_text']:
+                    desc += j + ','
+
+        objects.append(classes.Object(x, y, id, street, desc, {}))
+        cnt += 1
+    return objects
