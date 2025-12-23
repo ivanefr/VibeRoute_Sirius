@@ -210,3 +210,6 @@ test2.py
 test22.py
 __pycache__/
 __pycache__
+*.geojson
+test.txt
+map.html

@@ -10,6 +10,52 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
     <style>
         .leaflet-control-attribution { display: none; }
+        .model-radio input[type="radio"] {
+            display: none;
+        }
+        .model-radio label {
+            display: inline-block;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        .model-radio label:hover {
+            background: #e9e9e9;
+        }
+        .model-radio input[type="radio"]:checked + label {
+            background: #007bff;
+            color: white;
+            border-color: #0056b3;
+        }
+        .section-label {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .section-divider {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 15px 0;
+        }
+        .leftcol {
+            width: 60%;
+        }
+        .rightcol {
+            width: 40%;
+        }
+        .char-vibe-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .char-vibe-cards .char-vibe-card {
+            width: calc(50% - 5px);
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 
@@ -61,7 +107,7 @@
 
                     </div>
                     <div class="param-block walk-details">
-                        <label>Длительность прогулки</label>
+                        <label class="section-label">Длительность прогулки</label>
                         <div class="flex gap budget-row" style="margin-top:5px;align-items:center;">
                             <input type="range" min="60" max="480" step="15"
                                 value="{{ formdata.duration_hrs|default(2)*60 + formdata.duration_mins|default(0) }}"
@@ -74,8 +120,9 @@
                             <input type="hidden" name="duration_mins" id="duration_mins">
                         </div>
 
+                        <hr class="section-divider">
 
-                        <label style="margin-top:17px;">Бюджет на человека <span
+                        <label class="section-label">Бюджет на человека <span
                                 style="font-size:0.98em;color:#aaa;">(₽)</span></label>
                         <div class="flex gap budget-row" style="margin-top:5px;align-items:center;">
                             <input type="range" min="500" max="10000" step="100"
@@ -90,7 +137,9 @@
                             <button type="button" class="pres-budget" onclick="setBudget(10000)">Безлимитный</button>
                         </div>
 
-                        <label style="margin-top:17px;">Характер прогулки</label>
+                        <hr class="section-divider">
+
+                        <label class="section-label">Характер прогулки</label>
                         <div class="char-vibe-cards" id="vibe-cards">
                             {% for v in vibes %}
                             <div class="char-vibe-card {% if formdata.vibe==v[0] %}selected{% endif %}"
@@ -101,8 +150,24 @@
                         </div>
                         <input type="hidden" id="vibe" name="vibe" value="{{ formdata.vibe|default('romantic') }}">
 
-                        <label style="margin-top:15px;">Свои пожелания</label>
-                        <textarea name="extra_notes" placeholder="Опишите ваши пожелания..." style="width:100%;min-height:120px;resize:vertical;">{{ formdata.extra_notes|default('') }}</textarea>
+                        <hr class="section-divider">
+
+                        <label class="section-label">Свои пожелания</label>
+                        <textarea name="extra_notes" placeholder="Опишите ваши пожелания..." style="width:100%;min-height:80px;resize:vertical;">{{ formdata.extra_notes|default('') }}</textarea>
+
+                        <hr class="section-divider">
+
+                        <label class="section-label">Выберите модель для генерации маршрута</label>
+                        <div style="margin-top:5px; display: flex; justify-content: space-between;">
+                            <div class="model-radio">
+                                <input type="radio" id="model_qwen_235b" name="model" value="qwen_235b" {% if formdata.model|default('qwen_235b') == 'qwen_235b' %}checked{% endif %}>
+                                <label for="model_qwen_235b">Qwen 235b</label>
+                            </div>
+                            <div class="model-radio">
+                                <input type="radio" id="model_qwen_32b" name="model" value="qwen_32b" {% if formdata.model|default('qwen_235b') == 'qwen_32b' %}checked{% endif %}>
+                                <label for="model_qwen_32b">Qwen 32b</label>
+                            </div>
+                        </div>
                     </div>
                     <button class="btn-main" type="submit" id="submitBtn" {% if loading %}disabled{% endif %}>
                         {% if loading %}<span id="spinner">⏳</span> Генерируем...{% else %}Создать Маршрут{% endif %}
@@ -110,7 +175,7 @@
                 </div>
             </div>
             <div class="rightcol">
-                <div id="map" style="width:100%;height:700px;border-radius:14px;box-shadow:0 1px 8px #0002;"></div>
+                <div id="map" style="width:100%;height:800px;border-radius:14px;box-shadow:0 1px 8px #0002;"></div>
                 <div style="font-size:.98em;color:#aaa;margin-top:10px;">* Маркеры появятся по мере заполнения точек.
                     Кликните по карте для добавления.</div>
             </div>

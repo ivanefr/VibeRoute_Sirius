@@ -69,6 +69,7 @@ def parse_form(req_form):
     fd["budget"] = int(req_form.get("budget", 2000))
     fd["vibe"] = req_form.get("vibe", "romantic")
     fd["extra_notes"] = req_form.get("extra_notes", "")
+    fd["model"] = req_form.get("model", "qwen_235b")
     fd["map_lat"] = req_form.get("map_lat", "")
     fd["map_lng"] = req_form.get("map_lng", "")
     fd["map_zoom"] = req_form.get("map_zoom", "")
@@ -273,6 +274,7 @@ def index():
             "vibe_verbose": get_vibe_verbose(formdata["vibe"]),
             "duration_str": f"{formdata['duration_hrs']} ч {formdata['duration_mins']} мин" if formdata['duration_mins'] else f"{formdata['duration_hrs']} ч",
             "budget": formdata['budget'],
+            "model": formdata["model"],
             "distance": f"{5.2+random.randint(-1,2)*0.3:.1f}",
             "steps": steps,
             "tips": demo_tips(formdata),
@@ -282,7 +284,7 @@ def index():
         loading = False
     else:
         # Try get prefilled params if url params
-        for k in ["start_addr", "end_addr", "duration_hrs", "duration_mins", "budget", "vibe", "extra_notes", "map_lat", "map_lng", "map_zoom"]:
+        for k in ["start_addr", "end_addr", "duration_hrs", "duration_mins", "budget", "vibe", "extra_notes", "model", "map_lat", "map_lng", "map_zoom"]:
             if k in request.args:
                 formdata[k] = request.args[k]
         if not request.args:
@@ -292,6 +294,7 @@ def index():
             formdata.setdefault("start_lng", "39.952640447932154")
             formdata.setdefault("end_lat", "43.4047")
             formdata.setdefault("end_lng", "39.9670")
+            formdata.setdefault("model", "qwen_235b")
             formdata.setdefault("map_lat", "43.4085")
             formdata.setdefault("map_lng", "39.9625")
             formdata.setdefault("map_zoom", "14")
