@@ -3,7 +3,7 @@ import classes
 
 
 def get_database():
-    with open('sirius_poi_all_info_clear_desc.geojson', 'r', encoding='utf-8') as f:
+    with open('sirius_super_cool.geojson', 'r', encoding='utf-8') as f:
         data = json.load(f)
 
     objects = []
@@ -11,8 +11,6 @@ def get_database():
     cnt = 0
 
     for i in data['features']:
-        # if cnt >= 50:
-        #     break
         x = i['geometry']['coordinates'][0]
         y = i['geometry']['coordinates'][1]
         id = cnt
@@ -25,6 +23,9 @@ def get_database():
             desc += f'Тип: {i['properties']['leisure']}. '
         if 'popularity_score' in i['properties']:
             desc += f'Уровень популярности: {i['properties']['popularity_score']}. '
+        if 'website' in i['properties']:
+            desc += f'Вебсайт: {i['info']['site']}. '
+
         if 'info' in i:
             if 'rating' in i['info']:
                 desc += f'Оценка по пятибалльной шкале: {i['info']['rating']}. '
@@ -34,8 +35,9 @@ def get_database():
             if len(i['info']['feat_text']) >= 1:
                 desc += 'Прочая информация: '
                 for j in i['info']['feat_text']:
-                    desc += j + ','
+                    desc += j + ', '
 
+        desc = desc.removesuffix(', ') + '. '
         objects.append(classes.Object(x, y, id, street, desc, {}))
         cnt += 1
     return objects
