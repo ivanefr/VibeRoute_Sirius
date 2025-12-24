@@ -62,7 +62,7 @@ def get_points_into_route(objects_list, p_start, p_end, max_points=5, max_distan
     sorted_objects = sorted(work_objects, key=cmp_to_key(comparator))
     ans = []
     for obj in sorted_objects:
-        if len(ans) >= max_points or distance_to_line(work_p_start, work_p_end, obj) > max_distance:
+        if len(ans) >= max_points: # or distance_to_line(work_p_start, work_p_end, obj) > max_distance:
             break
         ans.append(obj)
         # if is_proj_in_segment(work_p_start, work_p_end, obj):
@@ -85,3 +85,4 @@ def get_points_into_route(objects_list, p_start, p_end, max_points=5, max_distan
 # print("Точки, попадающие в маршрут:")
 # for obj in result:
 #     print(f"Долгота: {obj.x:.6f}, Широта: {obj.y:.6f}")
+
