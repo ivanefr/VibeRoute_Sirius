@@ -4,6 +4,7 @@ import ask_gpt
 import find_nearst_points
 import get_database
 import json
+import math
 from loguru import logger
 
 class Object:
@@ -17,17 +18,29 @@ class Object:
         self.name = name
         self.amenity = amenity
 
+    def dist_between_points(self, other):
+        R = 6371000
+        lat1, lon1, lat2, lon2 = map(math.radians, [self.x, self.y, other.x, other.y])
+
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+        return R * c
+
     def __eq__(self, other):
         return isinstance(other, Object) and self.x == other.x and self.y == other.y
 
     def __hash__(self):
         return hash(self.desc)
-    
+
     def __repr__(self):
         return f"{self.x=}; {self.y=}; {self.id=}, {self.desc=}; {self.other=}; {self.street=}"
 
 class EmbSearch:
-    def __init__(self, db, k):
+    def __init__(self, db, k, start_embs=None):
         descs = []
         self.db = db
         for i in self.db:
@@ -35,10 +48,15 @@ class EmbSearch:
 
         # self.emb = get_embedding.get_emb(descs)
         self.emb = []
-        with open("points_embeddings.txt", 'r', encoding='utf-8') as f:
-            for i in range(545):
-                l = list(map(float, f.readline().split()))
-                self.emb.append(l)
+        if start_embs == None:
+            with open("points_embeddings.txt", 'r', encoding='utf-8') as f:
+                for i in self.db:
+                    l = list(map(float, f.readline().split()))
+                    self.emb.append(l)
+        else:
+            logger.info(db)
+            for i in self.db:
+                self.emb.append(start_embs.emb[i.id])
 
         self.neigh = get_embedding.NN(self.emb, k)
 
@@ -91,7 +109,7 @@ class LLMAgent:
             }
         }]
         self.db = get_database.get_database()
-        self.embs = EmbSearch(self.db, 50)
+        self.embs = EmbSearch(self.db, 3)
 
     def get_places(self, query : str):
         res_points = find_nearst_points.get_points(self.db, self.embs, self.a, self.b, query)
@@ -116,12 +134,13 @@ class LLMAgent:
         return result, id
 
     def get_answer(self, a, b, w_type, time):
+        dist = a.dist_between_points(b)
         self.system_prompt = f"Ты находишься в России, на Федеральной территории Сириус. \
 Требуется построить пешеходный маршрут для цели: \"{w_type}\", который начинается в адресе \
 {a.street} и заканчивается в адресе {b.street}. Длительность маршрута должна \
-быть равна примерно {time} минут. Маршрут должен содержать не более 5 промежуточных \
+быть равна примерно {time} минут. Расстояние от точки {a.street} до точки {b.street} -- {dist} метров. Маршрут должен содержать не более 5 промежуточных \
 точек и быть интересным и наиболее подходящим для данного случая. В маршруте не должно быть \
-больше одного кафе или ресторана, если об этом не просит пользователь! \
+больше одного кафе или ресторана, если пользователь не попросил больше! \
 Все точки должны быть уникальными (в частности, ни одна промежуточная точка не должна совпадать \
 с точками {a.street} и {b.street})! Ты можешь спрашивать какие есть подходящие точки, \
 сделав запрос get_places. В качестве аргумента передай, какого типа точки тебе нужны. \
@@ -153,6 +172,6 @@ class LLMAgent:
         self.model.clear_history()
 
         for i in self.ans_id:
-            self.ans.append(i)
+            self.ans.append(self.db[i])
 
         return self.desc, self.ans
