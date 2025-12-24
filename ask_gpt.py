@@ -27,7 +27,9 @@ class QwenChat:
 
         response = self.client.chat.completions.create(
         # model=f"gpt://{YANDEX_CLOUD_FOLDER}/yandexgpt/latest",
-        # model=f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-32b/latest",
+        # model=f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-32b/latest"
+        # model=f"gpt://{YANDEX_CLOUD_FOLDER}/gemma-3-27b-it/latest"
+        # model=f"gpt://{YANDEX_CLOUD_FOLDER}/gpt-oss-20b/latest"
         model=f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-235b-a22b-fp8/latest",
             messages=self.messages,
             temperature=0.3,
@@ -47,4 +49,6 @@ class QwenChat:
         return name, args, id
     
     def clear_history(self):
-        self.messages = self.start_message
+        self.messages = [
+            {"role": "system", "content": self.start_message}
+        ]
