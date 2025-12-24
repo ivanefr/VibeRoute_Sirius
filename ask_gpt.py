@@ -17,13 +17,10 @@ class QwenChat:
             base_url="https://llm.api.cloud.yandex.net/v1",
             project=YANDEX_CLOUD_FOLDER
         )
-        self.messages = [
-            {"role": "system", "content": self.start_message}
-        ]
 
-    def ask(self, query, tools):
+    def ask(self, messages, query, tools):
         if len(query) >= 1:
-            self.messages.append({"role": "user", "content": query})
+            messages.append({"role": "user", "content": query})
 
         response = self.client.chat.completions.create(
         # model=f"gpt://{YANDEX_CLOUD_FOLDER}/yandexgpt/latest",
@@ -31,7 +28,7 @@ class QwenChat:
         # model=f"gpt://{YANDEX_CLOUD_FOLDER}/gemma-3-27b-it/latest"
         # model=f"gpt://{YANDEX_CLOUD_FOLDER}/gpt-oss-20b/latest"
         model=f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-235b-a22b-fp8/latest",
-            messages=self.messages,
+            messages=messages,
             temperature=0.3,
             tools=tools,
             tool_choice='required',
@@ -44,11 +41,14 @@ class QwenChat:
         args = json.loads(tool_call.function.arguments)
 
         answer = response.choices[0].message
-        self.messages.append(answer)
+        messages.append(answer)
         # self.messages.append({"role": "assistant", "content": answer})
         return name, args, id
+
+
+        # return answer
     
-    def clear_history(self):
-        self.messages = [
+    def clear_history(self, messages):
+        messages = [
             {"role": "system", "content": self.start_message}
         ]
