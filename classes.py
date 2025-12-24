@@ -54,7 +54,7 @@ class EmbSearch:
                     l = list(map(float, f.readline().split()))
                     self.emb.append(l)
         else:
-            logger.info(db)
+            # logger.info(db)
             for i in self.db:
                 self.emb.append(start_embs.emb[i.id])
 
@@ -111,8 +111,8 @@ class LLMAgent:
         self.db = get_database.get_database()
         self.embs = EmbSearch(self.db, 3)
 
-    def get_places(self, query : str):
-        res_points = find_nearst_points.get_points(self.db, self.embs, self.a, self.b, query)
+    def get_places(self, query : str, a, b):
+        res_points = find_nearst_points.get_points(self.db, self.embs, a, b, query)
         ans = ''
         for i in res_points:
             ans += 'id: ' + str(i.id) + ', adress: ' + str(i.street) + ', description: ' + str(i.desc) + '\n'
@@ -121,35 +121,25 @@ class LLMAgent:
     def message(self, text, points):
         return text, points
 
-    def answer_model(self):
-        name, args, id = self.model.ask(self.system_prompt, self.tools)
+    def answer_model(self, messages, desc_ans, ans_id, a, b, prompt):
+        name, args, id = self.model.ask(messages, prompt, self.tools)
 
         if name == "get_places":
-            result = self.get_places(**args)
+            result = self.get_places(args, a, b)
+            # return result, id
         elif name == "message":
             desc = args['text']
             points = args['points']
             result = self.message(desc, points)
-            self.desc, self.ans_id = result
-        return result, id
+
+            desc_ans, ans_id = result
+
+        return result, id, desc_ans, ans_id
 
     def get_answer(self, a, b, w_type, time):
         dist = a.dist_between_points(b)
-        type_route = ''
-        if w_type == 'friendly':
-            type_route = "Дружеская прогулка"
-        elif w_type == 'romantic':
-            type_route = 'Романтическая прогулка'
-        elif w_type == "family":
-            type_route = "Прогулка с семьёй"
-        elif w_type == "active":
-            type_route = "Активная прогулка"
-        elif w_type == "cozy":
-            type_route = "Спокойная и уютная прогулка"
-        elif w_type == "cultural":
-            type_route = "Культурная прогулка"
         self.system_prompt = f"Ты находишься в России, на Федеральной территории Сириус. \
-Требуется построить пешеходный маршрут для цели: \"{type_route}\", который начинается в адресе \
+Требуется построить пешеходный маршрут для цели: \"{w_type}\", который начинается в адресе \
 {a.street} и заканчивается в адресе {b.street}. Длительность маршрута должна \
 быть равна примерно {time} минут. Расстояние от точки {a.street} до точки {b.street} -- {dist} метров. Маршрут должен содержать не более 5 промежуточных \
 точек и быть интересным и наиболее подходящим для данного случая. В маршруте не должно быть \
@@ -161,32 +151,36 @@ class LLMAgent:
 Когда будешь готов добавить точку в маршрут, вызови функцию message и передай ей адреса и массив id точек. \
 За раз можно сделать только один запрос к функциям. Всего, прежде чем выдать ответ, сделай не более 5 запросов. \
 После 5 запросов обязательно выведи ответ, если не сделал этого раньше!!! \
-Начальную и конечную точку не нужно добавлять в маршрут! Также сделай чтобы  \
-выбранные тобой точки обходились в оптимальном порядке (чтобы суммарное расстояние было как можно меньше)."
+Начальную и конечную точку не нужно добавлять в маршрут!"
 
-        self.a = a
-        self.b = b
-        self.w_type = w_type
-        self.time = time
-        self.ans_id = []
-        self.ans = []
-        self.desc = 'no-description'
         cnt = 0
-        while cnt < 10 and len(self.ans_id) == 0:
+
+        desc_ans = 'no-description'
+        ans_id = []
+        ans = []
+        prompt = self.system_prompt
+
+        messages = [
+            {"role": "system", "content": self.model.start_message}
+        ]
+
+        while cnt < 10 and len(ans_id) == 0:
             cnt += 1
 
-            res_gpt, id = self.answer_model()
+            res_gpt, id, desc_ans, ans_id = self.answer_model(messages, desc_ans, ans_id, a, b, prompt)
+            # logger.info(desc_ans)
+            # logger.info(ans_id)
 
-            self.model.messages.append({
+            messages.append({
                 "role": "tool",
                 "tool_call_id": id, # self.model.tool_call.id,
                 "content": json.dumps(res_gpt, ensure_ascii=False)
             })
-            self.system_prompt = ""
-        self.model.clear_history()
+            prompt = ""
 
-        for i in self.ans_id:
-            self.ans.append(i)
-            # self.ans.append(self.db[i])
+        self.model.clear_history(messages)
 
-        return self.desc, self.ans
+        for i in ans_id:
+            ans.append(self.db[i])
+
+        return desc_ans, ans
