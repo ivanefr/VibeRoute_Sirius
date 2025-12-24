@@ -1,5 +1,6 @@
 from math import sqrt, cos, radians
 from functools import cmp_to_key
+from classes import *
 
 def dot_product(x1, y1, x2, y2):
     return x1 * x2 + y1 * y2
@@ -28,20 +29,20 @@ def is_proj_in_segment(a, b, p):
     d2 = dot_product(x3 - x2, y3 - y2, x1 - x2, y1 - y2)
     return d1 >= 0 and d2 >= 0
 
-def get_points_into_route(objects_list, p_start, p_end, max_points=40, max_distance=2):
+def get_points_into_route(objects_list, p_start, p_end, max_points=5, max_distance=1000):
     work_objects = []
     for obj in objects_list:
-        work_objects.append(Object(obj.x, obj.y, obj.desc, obj.other))
-    work_p_start = Object(p_start.x, p_start.y)
-    work_p_end = Object(p_end.x, p_end.y)
-    
+        work_objects.append(obj)
+    work_p_start = p_start
+    work_p_end = p_end
+
     mean_lat = 0
     for obj in work_objects:
         mean_lat = mean_lat + obj.y
     mean_lat = mean_lat / len(work_objects)
-    
+
     lon_to_km = 111.32 * cos(radians(mean_lat))
-    
+
     for obj in work_objects:
         obj.x = lon_to_km * obj.x
         obj.y = 111.32 * obj.y
@@ -63,24 +64,24 @@ def get_points_into_route(objects_list, p_start, p_end, max_points=40, max_dista
     for obj in sorted_objects:
         if len(ans) >= max_points or distance_to_line(work_p_start, work_p_end, obj) > max_distance:
             break
-        if is_proj_in_segment(work_p_start, work_p_end, obj):
-            result_obj = Object(
-                obj.x / lon_to_km,
-                obj.y / 111.32,
-                obj.desc,
-                obj.other
-            )
-            ans.append(result_obj)
+        ans.append(obj)
+        # if is_proj_in_segment(work_p_start, work_p_end, obj):
+        #     result_obj = Object(
+        #         obj.x / lon_to_km,
+        #         obj.y / 111.32,
+        #         obj.desc,
+        #         obj.other
+        #     )
+        #     ans.append(result_obj)
     
     return ans
 
 
-#нужны данные:
-#coordinates_list, p_start, p_end
+# #нужны данные:
+# #coordinates_list, p_start, p_end
 
-result = get_points_into_route(coordinates_list, p_start, p_end)
+# result = get_points_into_route(coordinates_list, p_start, p_end)
 
-print("Точки, попадающие в маршрут:")
-for obj in result:
-
-    print(f"Долгота: {obj.x:.6f}, Широта: {obj.y:.6f}")
+# print("Точки, попадающие в маршрут:")
+# for obj in result:
+#     print(f"Долгота: {obj.x:.6f}, Широта: {obj.y:.6f}")
