@@ -1,5 +1,6 @@
 # import openai
 from openai import OpenAI
+from loguru import logger
 import json
 
 with open("api_key", 'r') as file:
@@ -21,7 +22,8 @@ class QwenChat:
         ]
 
     def ask(self, query, tools):
-        self.messages.append({"role": "user", "content": query})
+        if len(query) >= 1:
+            self.messages.append({"role": "user", "content": query})
 
         response = self.client.chat.completions.create(
         # model=f"gpt://{YANDEX_CLOUD_FOLDER}/yandexgpt/latest",
@@ -35,27 +37,13 @@ class QwenChat:
 
         tool_call = response.choices[0].message.tool_calls[0]
         name = tool_call.function.name
+        id = tool_call.id
         args = json.loads(tool_call.function.arguments)
 
-        return name, args
-
-        # answer = response.choices[0].message.content
+        answer = response.choices[0].message
+        self.messages.append(answer)
         # self.messages.append({"role": "assistant", "content": answer})
-
-        # return answer
+        return name, args, id
     
     def clear_history(self):
         self.messages = self.start_message
-
-# def main():
-#     t = QwenChat()
-
-#     s = ''
-#     cnt = 0
-#     while s != '-1' and cnt < 20:
-#         cnt += 1
-#         print(t.ask(input()))
-
-
-# if __name__ == "__main__":
-#     main()
