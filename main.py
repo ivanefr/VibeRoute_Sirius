@@ -3,13 +3,15 @@ import random
 import json
 import requests
 import os
+from classes import LLMAgent, Object
+from get_database import get_database
 
 app = Flask(__name__)
-
+agent = LLMAgent()
 
 with open('index.html', 'r', encoding='utf-8') as file:
     BASE_HTML = file.read()
-
+DATABASE = get_database()
 VIBES = [
     ("friendly", "🤝", "Дружеская"),
     ("romantic", "❤️", "Романтическая"),
@@ -18,7 +20,14 @@ VIBES = [
     ("active", "🚴", "Активная"),
     ("cozy", "☕", "Спокойная / Уютная"),
 ]
-
+# PLACES : [{
+#       "name": "",
+#       "amenity": "" (amenity может быть None)
+#       "coordinates" : [
+#           x,
+#           y 
+# ]  
+# }]
 PLACES = [{
       "type": "Feature",
       "properties": {
@@ -64,11 +73,35 @@ PLACES = [{
 #  'map_zoom': '14'}
 def get_places(fd):
     global PLACES
-    dic = []
-    with open('sirius_poi_all_info_clear_desc.geojson', "r", encoding="utf-8") as f:
-        dic = json.load(f)
-    PLACES = random.choices(dic['features'], k=3)
+    start_street = fd['start_addr']
+    end_street = fd['end_addr']
+    start_x = float(fd['start_lat'])
+    start_y = float(fd['start_lng'])
+    end_x = float(fd['end_lat'])
+    end_y = float(fd['end_lng'])
+
+    vibe = fd['vibe']
+    time = fd['duration_hrs'] * 60 + fd['duration_mins']
+    start_object = Object(start_x, start_y, start_street)
+    end_object = Object(end_x, end_y, end_street)
+    description, inds = agent.get_answer(start_object, end_object, vibe, time)
+    print(description)
+    print("AAAAAAAAA POINTSSS")
+    PLACES.clear()
+    for ind in inds:
+        point = DATABASE[ind]
+        PLACES.append({"name": point.name,
+                       "amenity": point.amenity,
+                       "coordinates": [
+                           point.x,
+                           point.y,
+                       ]})
     return PLACES
+    # dic = []
+    # with open('sirius_poi_all_info_clear_desc.geojson', "r", encoding="utf-8") as f:
+    #     dic = json.load(f)
+    # PLACES = random.choices(dic['features'], k=3)
+    # return PLACES
 
 def parse_form(req_form):
     fd = {}
@@ -271,11 +304,11 @@ def index():
             formdata["end_lat"] = str(end_coords["lat"])
             formdata["end_lng"] = str(end_coords["lng"])
 
-        if start_coords:
-            print(f"START: {start_coords['lat']}, {start_coords['lng']}")
+        # if start_coords:
+        #     print(f"START: {start_coords['lat']}, {start_coords['lng']}")
 
-        if end_coords:
-            print(f"END: {end_coords['lat']}, {end_coords['lng']}")
+        # if end_coords:
+        #     print(f"END: {end_coords['lat']}, {end_coords['lng']}")
         # PLACES = get_places(start_coords['lat'], start_coords['lng'], end_coords['lat'], end_coords['lng'])
         # print(request.args)
         # print(request)
@@ -316,7 +349,7 @@ def index():
         PLACES = get_places(formdata)
         
         print(f"{formdata=}")
-        print(f"{result_data=}")
+        # print(f"{result_data=}")
     # Читаем шаблон в UTF-8, чтобы не падать на эмодзи/спецсимволах в Windows-консоли
     # Вот здесь появится функция которая получает массив PLACE
     with open('index.html', 'r', encoding='utf-8') as file:

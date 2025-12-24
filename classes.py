@@ -7,19 +7,24 @@ import json
 from loguru import logger
 
 class Object:
-    def __init__(self, x, y, id, street, desc, other_params):
+    def __init__(self, x, y, street, name=None, amenity=None, desc=None, id=None, other_params=None):
         self.x = x
         self.y = y
         self.id = id
         self.desc = desc
         self.other = other_params
         self.street = street
+        self.name = name
+        self.amenity = amenity
 
     def __eq__(self, other):
         return isinstance(other, Object) and self.x == other.x and self.y == other.y
 
     def __hash__(self):
         return hash(self.desc)
+    
+    def __repr__(self):
+        return f"{self.x=}; {self.y=}; {self.id=}, {self.desc=}; {self.other=}; {self.street=}"
 
 class EmbSearch:
     def __init__(self, db, k):
@@ -92,7 +97,7 @@ class LLMAgent:
         res_points = find_nearst_points.get_points(self.db, self.embs, self.a, self.b, query)
         ans = ''
         for i in res_points:
-            ans += 'id: ' + str(i.id) + ', adress: ' + i.street + ', description: ' + i.desc + '\n'
+            ans += 'id: ' + str(i.id) + ', adress: ' + str(i.street) + ', description: ' + str(i.desc) + '\n'
         return ans
 
     def message(self, text, points):
@@ -148,6 +153,6 @@ class LLMAgent:
         self.model.clear_history()
 
         for i in self.ans_id:
-            self.ans.append(self.db[i])
+            self.ans.append(i)
 
         return self.desc, self.ans

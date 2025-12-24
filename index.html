@@ -353,16 +353,15 @@
 
             clearPlaceMarkers();
 
-            PLACES.forEach((feat) => {
-                const coords = feat?.geometry?.coordinates;
+            PLACES.forEach((place) => {
+                const coords = place?.coordinates;
                 if (!Array.isArray(coords) || coords.length < 2) return;
                 const lng = parseFloat(coords[0]);
                 const lat = parseFloat(coords[1]);
                 if (![lat, lng].every(n => Number.isFinite(n))) return;
 
-                const props = feat?.properties || {};
-                const name = (props.name || props['name:ru'] || props['name:en'] || 'Место');
-                const amenity = (props.amenity || '');
+                const name = (place.name || 'Место');
+                const amenity = (place.amenity || '');
 
                 const m = L.marker([lat, lng], {
                     icon: createColoredIcon('#5797f8', 'place')
@@ -746,7 +745,7 @@
             let waypoints = [L.latLng(sLat, sLng)];
 
             PLACES.forEach((place) => {
-                const coords = place?.geometry?.coordinates;
+                const coords = place?.coordinates;
                 if (Array.isArray(coords) && coords.length >= 2) {
                     const lng = parseFloat(coords[0]);
                     const lat = parseFloat(coords[1]);

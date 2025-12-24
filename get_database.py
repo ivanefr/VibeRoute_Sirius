@@ -15,22 +15,25 @@ def get_database():
         y = i['geometry']['coordinates'][1]
         id = cnt
         street = i['properties']['street']
-        desc = f'Название: {i['properties']['name']}. '
-
+        desc = f"Название: {i['properties']['name']}. "
+        name = f"{i['properties']['name']}"
+        amenity = None
         if 'amenity' in i['properties']:
-            desc += f'Тип: {i['properties']['amenity']}. '
+            amenity = i['properties']['amenity']
+        if 'amenity' in i['properties']:
+            desc += f"Тип: {i['properties']['amenity']}. "
         if 'leisure' in i['properties']:
-            desc += f'Тип: {i['properties']['leisure']}. '
+            desc += f"Тип: {i['properties']['leisure']}. "
         if 'popularity_score' in i['properties']:
-            desc += f'Уровень популярности: {i['properties']['popularity_score']}. '
+            desc += f"Уровень популярности: {i['properties']['popularity_score']}. "
         if 'website' in i['properties']:
-            desc += f'Вебсайт: {i['info']['site']}. '
+            desc += f"Вебсайт: {i['info']['site']}. "
 
         if 'info' in i:
             if 'rating' in i['info']:
-                desc += f'Оценка по пятибалльной шкале: {i['info']['rating']}. '
+                desc += f"Оценка по пятибалльной шкале: {i['info']['rating']}. "
             if 'description' in i['info'] and i['info']['description'] != None:
-                desc += f'Короткое описание: {i['info']['rating']}. '
+                desc += f"Короткое описание: {i['info']['rating']}. "
 
             if len(i['info']['feat_text']) >= 1:
                 desc += 'Прочая информация: '
@@ -38,6 +41,6 @@ def get_database():
                     desc += j + ', '
 
         desc = desc.removesuffix(', ') + '. '
-        objects.append(classes.Object(x, y, id, street, desc, {}))
+        objects.append(classes.Object(x, y, id, street, name, amenity, desc, {}))
         cnt += 1
     return objects
