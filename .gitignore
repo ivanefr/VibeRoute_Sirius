@@ -213,3 +213,4 @@ __pycache__
 *.geojson
 test.txt
 map.html
+api_key

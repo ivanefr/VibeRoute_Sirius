@@ -41,6 +41,6 @@ def get_database():
                     desc += j + ', '
 
         desc = desc.removesuffix(', ') + '. '
-        objects.append(classes.Object(x, y, id, street, name, amenity, desc, {}))
+        objects.append(classes.Object(x, y, street, name, amenity, desc, id, {}))
         cnt += 1
     return objects

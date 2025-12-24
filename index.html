@@ -366,6 +366,7 @@
                 const m = L.marker([lat, lng], {
                     icon: createColoredIcon('#5797f8', 'place')
                 }).addTo(map);
+                m.bindTooltip(String(name), { permanent: false, direction: 'top' });
                 m.bindPopup(`<b>${String(name)}</b>${amenity ? `<br><span style="color:#666">${String(amenity)}</span>` : ''}`);
                 placeMarkers.push(m);
             });

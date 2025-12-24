@@ -27,6 +27,7 @@ class QwenChat:
 
         response = self.client.chat.completions.create(
         # model=f"gpt://{YANDEX_CLOUD_FOLDER}/yandexgpt/latest",
+        # model=f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-32b/latest",
         model=f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-235b-a22b-fp8/latest",
             messages=self.messages,
             temperature=0.3,
