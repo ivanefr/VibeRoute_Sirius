@@ -1,13 +1,17 @@
 import classes
+from loguru import logger
 import get_points_by_dist
 
 def get_points(db, qemb_s, p_start, p_end, pipe):
+    resd = get_points_by_dist.get_points_into_route(db, p_start, p_end, 50)
+
+    resd_embs = classes.EmbSearch(resd, 6, qemb_s)
+    resd_final = resd_embs.search(pipe)
+
     resq = qemb_s.search(pipe)
-    resq_final = get_points_by_dist.get_points_into_route(resq, p_start, p_end, 8)
 
-    # resd = get_points_by_dist.get_points_into_route(db, p_start, p_end, 50)
-    # demb_s = classes.EmbSearch(resd, 10, 10)
-    # resd_final = demb_s.search(pipe)
+    for i in resq:
+        resd_final.append(i)
 
-    # return list(dict.from_keys(resd_final.append(resq_final)))
-    return resq_final
+    ans = list(dict.fromkeys(resd_final))
+    return ans
