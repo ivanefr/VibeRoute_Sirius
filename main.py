@@ -96,6 +96,7 @@ def get_places(fd):
                            point.x,
                            point.y,
                        ]})
+    print(PLACES)
     return PLACES
     # dic = []
     # with open('sirius_poi_all_info_clear_desc.geojson', "r", encoding="utf-8") as f:
