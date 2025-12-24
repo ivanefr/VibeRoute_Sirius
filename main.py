@@ -17,7 +17,6 @@ VIBES = [
     ("cultural", "🏛️", "Культурная"),
     ("active", "🚴", "Активная"),
     ("cozy", "☕", "Спокойная / Уютная"),
-    ("gourmet", "🍕", "Гурманская"),
 ]
 
 PLACES = [{
@@ -48,7 +47,22 @@ PLACES = [{
       }
     },
 ]
-def get_places(fd, rd):
+#formdata={'start_addr': 'Сириус Арена, Сириус',
+#  'end_addr': 'Сочи Парк, Сириус',
+#  'start_lat': '43.40881998152516',
+#  'start_lng': '39.952640447932154',
+#  'end_lat': '43.4047',
+#  'end_lng': '39.967',
+#  'duration_hrs': 2,
+#  'duration_mins': 0,
+#  'budget': 2000, 
+#  'vibe': 'friendly',
+#  'extra_notes': '',
+#  'model': 'qwen_235b',
+#  'map_lat': '43.4085',
+#  'map_lng': '39.9625',
+#  'map_zoom': '14'}
+def get_places(fd):
     global PLACES
     dic = []
     with open('sirius_poi_all_info_clear_desc.geojson', "r", encoding="utf-8") as f:
@@ -67,7 +81,7 @@ def parse_form(req_form):
     fd["duration_hrs"] = int(req_form.get("duration_hrs", 2))
     fd["duration_mins"] = int(req_form.get("duration_mins", 0))
     fd["budget"] = int(req_form.get("budget", 2000))
-    fd["vibe"] = req_form.get("vibe", "romantic")
+    fd["vibe"] = req_form.get("vibe", "friendly")
     fd["extra_notes"] = req_form.get("extra_notes", "")
     fd["model"] = req_form.get("model", "qwen_235b")
     fd["map_lat"] = req_form.get("map_lat", "")
@@ -219,7 +233,7 @@ def get_vibe_verbose(vibe):
     for v in VIBES:
         if v[0] == vibe:
             return v[2]
-    return "Романтическая"
+    return "Дружеская"
 
 
 def demo_tips(formdata):
@@ -299,7 +313,7 @@ def index():
             formdata.setdefault("map_lng", "39.9625")
             formdata.setdefault("map_zoom", "14")
     if result_data is not None:
-        PLACES = get_places(formdata, result_data)
+        PLACES = get_places(formdata)
         
         print(f"{formdata=}")
         print(f"{result_data=}")
