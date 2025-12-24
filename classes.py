@@ -27,10 +27,11 @@ class EmbSearch:
         self.db = db
         for i in self.db:
             descs.append(i.desc)
+
         # self.emb = get_embedding.get_emb(descs)
         self.emb = []
-        with open("points_embeddings", 'r', encoding='utf-8') as f:
-            for i in range(266):
+        with open("points_embeddings.txt", 'r', encoding='utf-8') as f:
+            for i in range(545):
                 l = list(map(float, f.readline().split()))
                 self.emb.append(l)
 
@@ -39,8 +40,6 @@ class EmbSearch:
     def search(self, query):
         q_emb = get_embedding.get_emb([query])
         idx = get_embedding.get_nearst_embedding(self.neigh, q_emb)
-        # return idx
-
         res = []
         for i in idx[0]:
             res.append(self.db[i])
@@ -90,33 +89,23 @@ class LLMAgent:
         self.embs = EmbSearch(self.db, 50)
 
     def get_places(self, query : str):
-        # logger.info(query)
         res_points = find_nearst_points.get_points(self.db, self.embs, self.a, self.b, query)
         ans = ''
         for i in res_points:
             ans += 'id: ' + str(i.id) + ', adress: ' + i.street + ', description: ' + i.desc + '\n'
-        # # logger.info(ans)
-        # logger.info(res_points)
         return ans
 
     def message(self, text, points):
-        # logger.info(text, points)
         return text, points
 
     def answer_model(self):
         name, args, id = self.model.ask(self.system_prompt, self.tools)
 
         if name == "get_places":
-            # self.system_prompt = self.get_place(**args)
             result = self.get_places(**args)
         elif name == "message":
-            # logger.info(args)
-            # print(args)
             desc = args['text']
             points = args['points']
-            # logger.info(desc)
-            # logger.info(points)
-
             result = self.message(desc, points)
             self.desc, self.ans_id = result
         return result, id
@@ -136,9 +125,6 @@ class LLMAgent:
 За раз можно сделать только один запрос к функциям. Всего, прежде чем выдать ответ, сделай не более 5 запросов. \
 После 5 запросов обязательно выведи ответ, если не сделал этого раньше!!! \
 Начальную и конечную точку не нужно добавлять в маршрут!"
-# Маршрут обязательно должен начинаться в точке {a.id} и заканчиваться в точке {b.id}!!!"
-
-        # logger.info(self.system_prompt)
 
         self.a = a
         self.b = b
@@ -151,9 +137,7 @@ class LLMAgent:
         while cnt < 10 and len(self.ans_id) == 0:
             cnt += 1
 
-            # print(self.system_prompt)
             res_gpt, id = self.answer_model()
-            # print(res_gpt)
 
             self.model.messages.append({
                 "role": "tool",
