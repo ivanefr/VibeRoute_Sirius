@@ -84,7 +84,7 @@ def get_places(fd):
     time = fd['duration_hrs'] * 60 + fd['duration_mins']
     start_object = Object(start_x, start_y, start_street)
     end_object = Object(end_x, end_y, end_street)
-    description, inds = agent.get_answer(start_object, end_object, vibe, time)
+    description, inds = agent.get_answer(start_object, end_object, vibe, time, fd['model'])
     print(description)
     print("AAAAAAAAA POINTSSS")
     PLACES.clear()

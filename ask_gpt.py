@@ -21,16 +21,20 @@ class QwenChat:
             {"role": "system", "content": self.start_message}
         ]
 
-    def ask(self, query, tools):
+    def ask(self, query, tools, model_name="qwen_235b"):
         if len(query) >= 1:
             self.messages.append({"role": "user", "content": query})
 
+        # Map form model names to actual API model names
+        model_mapping = {
+            "qwen_235b": f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-235b-a22b-fp8/latest",
+            "gpt-oss-120b": f"gpt://{YANDEX_CLOUD_FOLDER}/gpt-oss-120b/latest"
+        }
+
+        model = model_mapping.get(model_name, f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-235b-a22b-fp8/latest")
+
         response = self.client.chat.completions.create(
-        # model=f"gpt://{YANDEX_CLOUD_FOLDER}/yandexgpt/latest",
-        # model=f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-32b/latest"
-        # model=f"gpt://{YANDEX_CLOUD_FOLDER}/gemma-3-27b-it/latest"
-        # model=f"gpt://{YANDEX_CLOUD_FOLDER}/gpt-oss-20b/latest"
-        model=f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-235b-a22b-fp8/latest",
+        model=model,
             messages=self.messages,
             temperature=0.3,
             tools=tools,

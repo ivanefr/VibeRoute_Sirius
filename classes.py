@@ -121,8 +121,8 @@ class LLMAgent:
     def message(self, text, points):
         return text, points
 
-    def answer_model(self):
-        name, args, id = self.model.ask(self.system_prompt, self.tools)
+    def answer_model(self, model_name="qwen_235b"):
+        name, args, id = self.model.ask(self.system_prompt, self.tools, model_name)
 
         if name == "get_places":
             result = self.get_places(**args)
@@ -133,7 +133,7 @@ class LLMAgent:
             self.desc, self.ans_id = result
         return result, id
 
-    def get_answer(self, a, b, w_type, time):
+    def get_answer(self, a, b, w_type, time, model_name="qwen_235b"):
         dist = a.dist_between_points(b)
         type_route = ''
         if w_type == 'friendly':
@@ -175,7 +175,7 @@ class LLMAgent:
         while cnt < 10 and len(self.ans_id) == 0:
             cnt += 1
 
-            res_gpt, id = self.answer_model()
+            res_gpt, id = self.answer_model(model_name)
 
             self.model.messages.append({
                 "role": "tool",

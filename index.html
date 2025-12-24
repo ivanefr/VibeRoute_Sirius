@@ -158,16 +158,10 @@
                         <hr class="section-divider">
 
                         <label class="section-label">Выберите модель для генерации маршрута</label>
-                        <div style="margin-top:5px; display: flex; justify-content: space-between;">
-                            <div class="model-radio">
-                                <input type="radio" id="model_qwen_235b" name="model" value="qwen_235b" {% if formdata.model|default('qwen_235b') == 'qwen_235b' %}checked{% endif %}>
-                                <label for="model_qwen_235b">Qwen 235b</label>
-                            </div>
-                            <div class="model-radio">
-                                <input type="radio" id="model_qwen_32b" name="model" value="qwen_32b" {% if formdata.model|default('qwen_235b') == 'qwen_32b' %}checked{% endif %}>
-                                <label for="model_qwen_32b">Qwen 32b</label>
-                            </div>
-                        </div>
+                        <select name="model" style="margin-top:5px; width: 250px; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 12px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); font-size: 16px; font-weight: 600; color: #1e293b; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); outline: none; position: relative;">
+                            <option value="qwen_235b" {% if formdata.model|default('qwen_235b') == 'qwen_235b' %}selected{% endif %}>🤖 Qwen 235b</option>
+                            <option value="gpt-oss-120b" {% if formdata.model|default('qwen_235b') == 'gpt-oss-120b' %}selected{% endif %}>🧠 gpt-oss-120b</option>
+                        </select>
                     </div>
                     <button class="btn-main" type="submit" id="submitBtn" {% if loading %}disabled{% endif %}>
                         {% if loading %}<span id="spinner">⏳</span> Генерируем...{% else %}Создать Маршрут{% endif %}
