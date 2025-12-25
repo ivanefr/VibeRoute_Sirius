@@ -28,7 +28,7 @@ class Object:
         a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-        return R * c
+        return round(R * c)
 
     def __eq__(self, other):
         return isinstance(other, Object) and self.x == other.x and self.y == other.y
@@ -78,7 +78,7 @@ class LLMAgent:
                 "name": "get_places",
                 "parameters": {
                     "type": "object",
-                    "description": "Функция получает строку запроса и возвращает 10 самых подходящих точек под запрос",
+                    "description": "Функция получает строку запроса и возвращает до 9 самых подходящих точек под запрос",
                     "properties": {
                         "query": {"type": "string"}
                     },
@@ -112,10 +112,12 @@ class LLMAgent:
         self.embs = EmbSearch(self.db, 3)
 
     def get_places(self, query : str, a, b):
-        res_points = find_nearst_points.get_points(self.db, self.embs, a, b, query)
+        res_points, dists_to_a, dists_to_b = find_nearst_points.get_points(self.db, self.embs, a, b, query)
         ans = ''
-        for i in res_points:
-            ans += 'id: ' + str(i.id) + ', adress: ' + str(i.street) + ', description: ' + str(i.desc) + '\n'
+        for i in range(len(res_points)):
+            ans += 'id: ' + str(res_points[i].id) + ', адрес: ' + res_points[i].street + \
+                ', расстояние до начальной точки в метрах: ' + str(dists_to_a[i]) + ', расстояние до конечной точки в метрах: ' + str(dists_to_b[i]) + \
+                ', описание: ' + res_points[i].desc + '\n'
         return ans
 
     def message(self, text, points):
@@ -126,6 +128,7 @@ class LLMAgent:
 
         if name == "get_places":
             result = self.get_places(args["query"], a, b)
+            logger.info(result)
             # return result, id
         elif name == "message":
             desc = args['text']
@@ -196,6 +199,6 @@ class LLMAgent:
         self.model.clear_history(messages)
 
         for i in ans_id:
-            ans.append(i)
+            ans.append(self.db[i])
 
         return desc_ans, ans
