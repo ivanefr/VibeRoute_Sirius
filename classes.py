@@ -26,6 +26,7 @@ class Object:
         dlon = lon2 - lon1
 
         a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+        a = max(0, min(1, a))
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
         return round(R * c)
@@ -205,6 +206,6 @@ class LLMAgent:
         self.model.clear_history(messages)
 
         for i in ans_id:
-            ans.append(self.db[i])
+            ans.append(i)
 
         return desc_ans, ans
