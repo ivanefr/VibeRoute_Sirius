@@ -227,6 +227,13 @@
                 c => { c.classList.remove('selected'); if (c.getAttribute('data-vibe') === val) c.classList.add('selected'); });
         }
         document.getElementById('mainform').addEventListener('submit', function (e) {
+            // Показываем состояние загрузки сразу при нажатии кнопки
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span id="spinner">⏳</span> Генерируем...';
+            }
+
             // Сохраняем текущие центр и зум карты, чтобы после POST она не сбрасывалась на Москву
             if (map) {
                 const c = map.getCenter();
