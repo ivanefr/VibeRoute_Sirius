@@ -199,6 +199,6 @@ class LLMAgent:
         self.model.clear_history(messages)
 
         for i in ans_id:
-            ans.append(self.db[i])
+            ans.append(i)
 
         return desc_ans, ans

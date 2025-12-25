@@ -353,7 +353,7 @@
 
             clearPlaceMarkers();
 
-            PLACES.forEach((place) => {
+            PLACES.forEach((place, index) => {
                 const coords = place?.coordinates;
                 if (!Array.isArray(coords) || coords.length < 2) return;
                 const lng = parseFloat(coords[0]);
@@ -362,12 +362,22 @@
 
                 const name = (place.name || 'Место');
                 const amenity = (place.amenity || '');
+                const number = index + 1; // Sequential numbering starting from 1
+
+                // Create custom icon with number
+                const customIcon = L.divIcon({
+                    className: 'numbered-marker',
+                    html: `<div style="background-color: #5797f8; width: 25px; height: 25px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;"><span style="transform: rotate(45deg); display: inline-block;">${number}</span></div>`,
+                    iconSize: [25, 25],
+                    iconAnchor: [12, 25],
+                    popupAnchor: [0, -25]
+                });
 
                 const m = L.marker([lat, lng], {
-                    icon: createColoredIcon('#5797f8', 'place')
+                    icon: customIcon
                 }).addTo(map);
-                m.bindTooltip(String(name), { permanent: false, direction: 'top' });
-                m.bindPopup(`<b>${String(name)}</b>${amenity ? `<br><span style="color:#666">${String(amenity)}</span>` : ''}`);
+                m.bindTooltip(`${number}. ${String(name)}`, { permanent: false, direction: 'top' });
+                m.bindPopup(`<b>${number}. ${String(name)}</b>${amenity ? `<br><span style="color:#666">${String(amenity)}</span>` : ''}`);
                 placeMarkers.push(m);
             });
         }
