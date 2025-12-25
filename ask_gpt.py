@@ -25,7 +25,7 @@ class QwenChat:
         # Map form model names to actual API model names
         model_mapping = {
             "qwen_235b": f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-235b-a22b-fp8/latest",
-            "gpt-oss-120b": f"gpt://{YANDEX_CLOUD_FOLDER}/gpt-oss-120b/latest"
+            "gemma-3-27b-it": f"gpt://{YANDEX_CLOUD_FOLDER}/gemma-3-27b-it/latest"
         }
 
         model = model_mapping.get(model_name, f"gpt://{YANDEX_CLOUD_FOLDER}/qwen3-235b-a22b-fp8/latest")

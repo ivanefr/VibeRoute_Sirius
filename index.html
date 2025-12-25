@@ -79,7 +79,7 @@
                         <label for="start_addr">Откуда начать?</label>
                         <div style="display:flex;gap:10px;margin-bottom:6px;">
                             <input type="text" id="start_addr" name="start_addr" placeholder="Введите адрес..."
-                                style="flex:1;" value="{{ formdata.start_addr|default('')}}">
+                                style="flex:1;" value="{{ formdata.start_addr|default('')}}" maxlength="200">
                             <button type="button" onclick="geoLocateStart()" title="Использовать геопозицию"
                                 style="border:none;background:none;cursor:pointer;font-size:1.35rem;">📍</button>
                         </div>
@@ -95,7 +95,7 @@
                         <label for="end_addr" style="margin-top:16px;">Куда хочешь прийти?</label>
                         <div style="display:flex;gap:10px;margin-bottom:6px;">
                             <input type="text" id="end_addr" name="end_addr" placeholder="Введите адрес..."
-                                style="flex:1;" value="{{ formdata.end_addr|default('')}}">
+                                style="flex:1;" value="{{ formdata.end_addr|default('')}}" maxlength="200">
 
                             <button type="button" onclick="geoLocateEnd()" title="Указать конечную точку по геопозиции"
                                 style="border:none;background:none;cursor:pointer;font-size:1.35rem;">
@@ -153,14 +153,14 @@
                         <hr class="section-divider">
 
                         <label class="section-label">Свои пожелания</label>
-                        <textarea name="extra_notes" placeholder="Опишите ваши пожелания..." style="width:100%;min-height:80px;resize:vertical;">{{ formdata.extra_notes|default('') }}</textarea>
+                        <textarea name="extra_notes" placeholder="Опишите ваши пожелания..." style="width:100%;min-height:80px;resize:vertical;" maxlength="1000">{{ formdata.extra_notes|default('') }}</textarea>
 
                         <hr class="section-divider">
 
                         <label class="section-label">Выберите модель для генерации маршрута</label>
                         <select name="model" style="margin-top:5px; width: 250px; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 12px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); font-size: 16px; font-weight: 600; color: #1e293b; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); outline: none; position: relative;">
                             <option value="qwen_235b" {% if formdata.model|default('qwen_235b') == 'qwen_235b' %}selected{% endif %}>🤖 Qwen 235b</option>
-                            <option value="gpt-oss-120b" {% if formdata.model|default('qwen_235b') == 'gpt-oss-120b' %}selected{% endif %}>🧠 gpt-oss-120b</option>
+                            <option value="gemma-3-27b-it" {% if formdata.model|default('qwen_235b') == 'gemma-3-27b-it' %}selected{% endif %}>💎 gemma-3-27b-it</option>
                         </select>
                     </div>
                     <button class="btn-main" type="submit" id="submitBtn" {% if loading %}disabled{% endif %}>
@@ -191,6 +191,12 @@
             </div>
         </div>
         <h3 style="margin:26px 0 9px 0;">Пошаговый план маршрута</h3>
+        {% if result_data.route_description %}
+        <div class="route-description" style="margin: 20px 0; padding: 20px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 12px; border: 1px solid #e1e5e9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); position: relative;">
+            <div style="position: absolute; top: -10px; left: 20px; background: #1e88e5; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Описание маршрута</div>
+            <div style="margin-top: 10px; line-height: 1.7; color: #374151; font-size: 16px; white-space: pre-line;">{{ result_data.route_description|safe }}</div>
+        </div>
+        {% endif %}
     </div>
     {% endif %}
     <script id="places-data" type="application/json">{{ places|tojson }}</script>

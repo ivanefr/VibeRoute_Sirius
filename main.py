@@ -84,20 +84,24 @@ def get_places(fd):
     time = fd['duration_hrs'] * 60 + fd['duration_mins']
     start_object = Object(start_x, start_y, start_street)
     end_object = Object(end_x, end_y, end_street)
-    description, inds = agent.get_answer(start_object, end_object, vibe, time, fd['model'])
+    description, inds = agent.get_answer(start_object, end_object, vibe, time, fd['budget'], fd['extra_notes'], fd['model'])
     print(description)
     print("AAAAAAAAA POINTSSS")
     PLACES.clear()
+    print(f"DEBUG: inds = {inds}, DATABASE length = {len(DATABASE)}")
     for ind in inds:
-        point = DATABASE[ind]
-        PLACES.append({"name": point.name,
-                       "amenity": point.amenity,
-                       "coordinates": [
-                           point.x,
-                           point.y,
-                       ]})
+        if 0 <= ind < len(DATABASE):
+            point = DATABASE[ind]
+            PLACES.append({"name": point.name,
+                           "amenity": point.amenity,
+                           "coordinates": [
+                               point.x,
+                               point.y,
+                           ]})
+        else:
+            print(f"WARNING: Invalid index {ind}, skipping")
     print(PLACES)
-    return PLACES
+    return PLACES, description
     # dic = []
     # with open('sirius_poi_all_info_clear_desc.geojson', "r", encoding="utf-8") as f:
     #     dic = json.load(f)
@@ -347,8 +351,9 @@ def index():
             formdata.setdefault("map_lng", "39.9625")
             formdata.setdefault("map_zoom", "14")
     if result_data is not None:
-        PLACES = get_places(formdata)
-        
+        PLACES, description = get_places(formdata)
+        result_data["route_description"] = description if description != 'no-description' else None
+
         print(f"{formdata=}")
         # print(f"{result_data=}")
     # Читаем шаблон в UTF-8, чтобы не падать на эмодзи/спецсимволах в Windows-консоли
